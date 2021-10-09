@@ -65,6 +65,18 @@ namespace RPG
 		{
 			LifeState = state;
 			SetupController();
+
+			if ( LifeState != LifeState.Alive )
+			{
+				StopUsing();
+				this.GetCastingAbility()?.Finish( AbilityResult.GenericFail );
+				RemoveAllStatus();
+			}
+
+			if ( state == LifeState ) return;
+
+			if ( state == LifeState.Dying )
+				OnIncapacitated();
 		}
 
 		public virtual void SetupController()
@@ -126,7 +138,7 @@ namespace RPG
 			EnableShadowInFirstPerson = true;
 
 			//DeleteAbilities();
-			RemoveAllStatus();
+			//RemoveAllStatus();
 
 			Health = HealthMax;
 			Velocity = Vector3.Zero;
@@ -302,7 +314,14 @@ namespace RPG
 				else if ( LifeState == LifeState.Dying )
 				{
 					if ( TimeSinceIncapacitated >= RPGGlobals.PlayerBleedOutTime )
-						OnKilled();
+					{
+						var info = new DamageInfo()
+							.WithAttacker( LastAttacker )
+							.WithWeapon( LastAttackerWeapon )
+						;
+						info.Damage = Health * 2f;
+						TakeDamage( info );
+					}
 				}
 				else if ( LifeState == LifeState.Dead )
 				{
@@ -362,7 +381,6 @@ namespace RPG
 		/// <summary>Called when the player is knocked down and put in the dying state.</summary>
 		public virtual void OnIncapacitated()
 		{
-			ChangeLifeState( LifeState.Dying );
 			TimeSinceIncapacitated = 0f;
 
 			// Do this for now. Later might want to make it like ganking instead of just hitting them again.
@@ -370,11 +388,7 @@ namespace RPG
 
 			RPGGame.RPGCurrent?.OnIncapacitated( this );
 
-			StopUsing();
-
 			PlaySound( "player.death" );
-
-			this.GetCastingAbility()?.Finish( AbilityResult.GenericFail );
 
 			//this.GetContainer()?.SetActive( null, true );
 		}
@@ -385,15 +399,12 @@ namespace RPG
 			// If we're Alive, set to incapacitated instead.
 			if ( LifeState == LifeState.Alive && Client.IsValid() )
 			{
-				OnIncapacitated();
+				ChangeLifeState( LifeState.Dying );
 				return;
 			}
 
 			ChangeLifeState( LifeState.Dead );
 			TimeSinceKilled = 0f;
-
-			this.GetCastingAbility()?.Finish( AbilityResult.GenericFail );
-			RemoveAllStatus();
 
 			RPGGame.RPGCurrent?.OnKilled( this );
 
