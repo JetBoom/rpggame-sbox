@@ -1,0 +1,13 @@
+@BaseClass = weapon : "A weapon"
+[
+  TypeOfWeapon(choices) : "Type" : "0" =
+  [
+    0 : "Melee"
+    1 : "Bow"
+  ]
+  ViewModel(studio) : "View Model" : ""
+  BaseDamage(float) : "Base damage" : 10
+  Range(float) : "Range" : 32
+  Arc(float) : "Arc (melee minimum dot)" : "0.5"
+  Speed(float) : "Speed" : 1
+]

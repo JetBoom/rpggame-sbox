@@ -1,0 +1,21 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	data = 
+	{
+		DisplayName = "Heal Self"
+		School = "1"
+		Description = "Heal for some minor damage."
+		Icon = resource:""
+		BaseManaCost = 5.0
+		BaseStaminaCost = 0.0
+		BaseCastingTime = 2.5
+		BaseCooldown = 20.0
+		CanBeHeld = true
+		CanCancel = true
+		StartSoundPath = "school.common.start"
+		LoopSoundPath = "school.common.loop"
+		SuccessSoundPath = "ability.thorn.success"
+		FailSoundPath = ""
+		IsUltimate = false
+	}
+}

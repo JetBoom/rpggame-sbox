@@ -1,0 +1,14 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	data = 
+	{
+		DisplayName = "Battle Axe"
+		Description = "It chops stuff up"
+		MaxAmount = 1
+		BaseVendorValue = 0
+		CanUseFromInventory = true
+		Model = resource:"weapons/rust_pistol/rust_pistol.vmdl"
+		Icon = resource:""
+		ModelScale = 1.0
+	}
+}

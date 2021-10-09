@@ -1,0 +1,14 @@
+<!-- kv3 encoding:text:version{e21c7f3c-8a33-41c5-9977-a76d3a32aa0d} format:generic:version{7412167c-06e9-4698-aff2-e63eb59037e7} -->
+{
+	data = 
+	{
+		DisplayName = "Iron Ore"
+		Description = "Ore rich with iron."
+		MaxAmount = 1000
+		BaseVendorValue = 0
+		CanUseFromInventory = false
+		Model = resource:"models/rust_nature/rocks/rock_small_c_cave.vmdl"
+		Icon = resource:""
+		ModelScale = 0.15
+	}
+}

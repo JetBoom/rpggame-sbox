@@ -1,0 +1,11 @@
+﻿HotBar {
+	position: absolute;
+	width: 100%;
+	bottom: 0px;
+	display: flex;
+	justify-content: center;
+
+	> AbilityIcon {
+		margin: 0 8px;
+	}
+}

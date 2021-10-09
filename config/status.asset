@@ -1,0 +1,9 @@
+@BaseClass = status : "A status"
+[
+  DisplayName(string) : "Name" : "Status Name"
+  OnlyNetworkToOwner(boolean) : "Only network to status owner" : 0
+  CanStack(boolean) : "Allow more than one of this type" : 1
+  Icon(material) : "Icon" : ""
+  BaseDuration(float) : "Duration" : 5 : "Up to status code for how this is used, by default it will delete after this time."
+  BaseMagnitude(float) : "Magnitude" : 1 : "Up to status code for how this is used."
+]

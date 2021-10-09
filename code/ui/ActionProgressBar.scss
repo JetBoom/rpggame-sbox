@@ -1,0 +1,37 @@
+﻿$bar_width: 200px;
+$bar_height: 12px;
+
+ActionProgressBar {
+	position: absolute;
+	top: 60%;
+	left: 50%;
+	background-color: rgba( 0, 0, 0, 0.9 );
+	width: $bar_width;
+	height: $bar_height;
+	border: 1px solid lightgray;
+	opacity: 1;
+	box-shadow: 0 0 4px rgba(black, 1) inset, 0 0 24px rgba(black, 1);
+	transition: opacity 0.15s ease-in-out;
+	border-radius: 4px;
+
+	&.hidden {
+		opacity: 0;
+	}
+
+	& > .bar {
+		width: 100%;
+		background-color: white;
+		box-shadow: 0 0 8px rgba(white, 1);
+		border-radius: 4px;
+	}
+
+	& > .action {
+		font-family: "roboto";
+		font-size: 20px;
+		color: white;
+		position: absolute;
+		top: $bar_height;
+		left: 0px;
+		text-shadow: 0 0 2px black;
+	}
+}

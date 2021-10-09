@@ -1,0 +1,12 @@
+@BaseClass = item : "An item"
+[
+  DisplayName(string) : "Name" : "Item Name"
+  Description(string) : "Description" : "No description."
+  MaxAmount(integer) : "Stack max" : 1
+  BaseVendorValue(integer) : "Value" : 0
+  CanUseFromInventory(boolean) : "Can be used" : 0
+  Model(studio) : "Model" : "models/citizen_props/cardboardbox01.vmdl"
+  Icon(material) : "Icon" : ""
+  ModelScale(float) : "Model Scale" : 1
+  IsBlessed(boolean) : "Is Blessed" : 0
+]

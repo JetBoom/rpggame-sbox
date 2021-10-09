@@ -1,0 +1,14 @@
+﻿StatBars {
+	position: absolute;
+	width: 100%;
+	bottom: 90px;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	align-items: center;
+	//background-color: rgba( 0, 0, 0, 0.9 );
+
+	> StatBar:not(:last-child) {
+		margin-bottom: 8px;
+	}
+}

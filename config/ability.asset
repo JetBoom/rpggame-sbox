@@ -1,0 +1,28 @@
+@BaseClass = ability : "An ability"
+[
+  DisplayName(string) : "Name" : "Ability Name"
+  School(choices) : "School" : "1" =
+  [
+    0 : "Hidden"
+    1 : "Common"
+    2 : "Fire"
+  ]
+  Description(string) : "Description" : "No description."
+  XPCost(integer) : "XP Cost" : 0
+  AbilitySlotsUsed(integer) : "Ability slots used" : 1
+  IsUltimate(boolean) : "Is Ultimate" : 0
+  UseCastingSpeed(boolean) : "Speed affected by casting speed" : 0
+  UseMeleeWeaponSpeed(boolean) : "Speed affected by melee weapon speed" : 0
+  UseBowWeaponSpeed(boolean) : "Speed affected by bow weapon speed" : 0
+  Icon(material) : "Icon" : ""
+  BaseManaCost(float) : "Mana Cost" : "10"
+  BaseStaminaCost(float) : "Stamina Cost" : "0"
+  BaseCastingTime(float) : "Casting Time" : "1"
+  BaseCooldown(float) : "Cool Down" : "3"
+  CanBeHeld(boolean) : "Can be held" : 1
+  CanCancel(boolean) : "Can cancel" : 1
+  StartSoundPath(sound) : "Start sound" : ""
+  LoopSoundPath(sound) : "Loop sound" : ""
+  SuccessSoundPath(sound) : "Success sound" : ""
+  FailSoundPath(sound) : "Fail sound" : ""
+]
