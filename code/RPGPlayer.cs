@@ -61,19 +61,37 @@ namespace RPG
 				Skills.Add( 0 );
 		}
 
+		public void ChangeLifeState( LifeState state )
+		{
+			LifeState = state;
+			SetupController();
+		}
+
+		public virtual void SetupController()
+		{
+			if ( LifeState == LifeState.Alive )
+			{
+				Controller = new RPGWalkController();
+				(Controller as RPGWalkController).SetSpeed( RPGGlobals.BaseWalkSpeed );
+			}
+			else if ( LifeState == LifeState.Dying )
+				Controller = new IncapacitatedController();
+			else
+				Controller = null;
+		}
+
 		public virtual void LoadOrRespawn()
 		{
 			SetModel( "models/citizen/citizen.vmdl" );
 
-			Controller = new RPGWalkController();
-			(Controller as RPGWalkController).SetSpeed( RPGGlobals.BaseWalkSpeed );
+			ChangeLifeState( LifeState.Alive );
+
 			Animator = new StandardPlayerAnimator();
 			Camera = new FirstPersonCamera();
 
 			CreateHull();
 			WaterLevel.Clear();
 
-			LifeState = LifeState.Alive;
 			Health = HealthMax;
 
 			EnableAllCollisions = true;
@@ -102,11 +120,6 @@ namespace RPG
 		{
 			LoadOrRespawn();
 
-			/*Controller = new RPGWalkController();
-			(Controller as RPGWalkController).SetSpeed( RPGGlobals.BaseWalkSpeed );
-			Animator = new StandardPlayerAnimator();
-			Camera = new FirstPersonCamera();*/
-
 			EnableAllCollisions = true;
 			EnableDrawing = true;
 			EnableHideInFirstPerson = true;
@@ -115,7 +128,6 @@ namespace RPG
 			//DeleteAbilities();
 			RemoveAllStatus();
 
-			LifeState = LifeState.Alive;
 			Health = HealthMax;
 			Velocity = Vector3.Zero;
 			WaterLevel.Clear();
@@ -149,6 +161,8 @@ namespace RPG
 
 			if ( IsServer )
 				ClientRpcTookDamage( To.Single( this ), info.Damage, LastDamageType );
+
+			this.ProceduralHitReaction( info );
 
 			base.TakeDamage( info );
 		}
@@ -269,37 +283,37 @@ namespace RPG
 		{
 			DebugHud();
 
-			if ( !this.IsAlive() )
-			{
-				if ( IsServer )
-				{
-					if ( LifeState == LifeState.Dying )
-					{
-						if ( TimeSinceIncapacitated >= RPGGlobals.PlayerBleedOutTime )
-							OnKilled();
-					}
-					else if ( LifeState == LifeState.Dead )
-					{
-						if ( TimeSinceKilled > RPGGlobals.PlayerRespawnTime )
-							LifeState = LifeState.Respawnable;
-					}
-				}
-
-				return;
-			}
-
 			if ( NeedsStatusCalculation )
 				CalculateStatuses();
 
 			if ( IsServer )
 			{
-				if ( TimeSinceHealthRegen >= RPGGlobals.HealthRegenRate && this.IsAlive() )
+				if ( LifeState == LifeState.Alive )
 				{
-					TimeSinceHealthRegen = 0f;
+					if ( TimeSinceHealthRegen >= RPGGlobals.HealthRegenRate )
+					{
+						TimeSinceHealthRegen = 0f;
 
-					var health = Health;
-					if ( health < HealthMax )
-						Health = MathF.Min( HealthMax, health + RPGGlobals.HealthRegenAmount );
+						var health = Health;
+						if ( health < HealthMax && health > 0f )
+							Health = MathF.Min( HealthMax, health + RPGGlobals.HealthRegenAmount );
+					}
+				}
+				else if ( LifeState == LifeState.Dying )
+				{
+					if ( TimeSinceIncapacitated >= RPGGlobals.PlayerBleedOutTime )
+						OnKilled();
+				}
+				else if ( LifeState == LifeState.Dead )
+				{
+					if ( TimeSinceKilled > RPGGlobals.PlayerRespawnTime )
+						LifeState = LifeState.Respawnable;
+				}
+				else if ( LifeState == LifeState.Respawnable )
+				{
+					// TODO: Make this a menu that pops up later.
+					if ( Input.Pressed( InputButton.Attack1 ) )
+						ServerCmdRespawn();
 				}
 			}
 
@@ -310,16 +324,11 @@ namespace RPG
 					if ( Input.Pressed( InputSlotKeys[i] ) )
 						OnPressHotKey( i );
 				}
-
-				// TODO: Make this a menu that pops up later.
-				if ( Input.Pressed( InputButton.Attack1 ) )
-					ServerCmdRespawn();
 			}
 
 			//UpdatePhysicsHull();
 
-			var controller = GetActiveController();
-			controller?.Simulate( cl, this, GetActiveAnimator() );
+			SimulateController( cl );
 
 			this.GetCastingAbility()?.Simulate( cl );
 
@@ -327,6 +336,13 @@ namespace RPG
 
 			if ( Input.Pressed( InputButton.Attack2 ) )
 				this.GetAbilityCasterComponent()?.TryStartAbility( cl.GetClientData( "ability_current", "ability_thorn" ) );
+		}
+
+		protected void SimulateController( Client cl )
+		{
+			var controller = GetActiveController();
+			if ( controller != null )
+				controller.Simulate( cl, this, GetActiveAnimator() );
 		}
 
 		public override void OnActiveChildChanged( Entity previous, Entity next )
@@ -346,8 +362,11 @@ namespace RPG
 		/// <summary>Called when the player is knocked down and put in the dying state.</summary>
 		public virtual void OnIncapacitated()
 		{
-			LifeState = LifeState.Dying;
+			ChangeLifeState( LifeState.Dying );
 			TimeSinceIncapacitated = 0f;
+
+			// Do this for now. Later might want to make it like ganking instead of just hitting them again.
+			Health = Math.Min( HealthMax, 50f );
 
 			RPGGame.RPGCurrent?.OnIncapacitated( this );
 
@@ -355,22 +374,26 @@ namespace RPG
 
 			PlaySound( "player.death" );
 
-			var castingAbility = this.GetCastingAbility();
-			if ( castingAbility != null )
-				castingAbility.Finish( AbilityResult.GenericFail );
+			this.GetCastingAbility()?.Finish( AbilityResult.GenericFail );
 
 			//this.GetContainer()?.SetActive( null, true );
 		}
 
-		/// <summary>Called when the player is fully killed and put in the DEAD state.</summary>
+		/// <summary>Called when health reaches 0.</summary>
 		public override void OnKilled()
 		{
-			// Run incapacitated code first since we shouldn't skip the dying state code.
-			if ( LifeState != LifeState.Dying )
+			// If we're Alive, set to incapacitated instead.
+			if ( LifeState == LifeState.Alive && Client.IsValid() )
+			{
 				OnIncapacitated();
+				return;
+			}
 
-			LifeState = LifeState.Dead;
+			ChangeLifeState( LifeState.Dead );
 			TimeSinceKilled = 0f;
+
+			this.GetCastingAbility()?.Finish( AbilityResult.GenericFail );
+			RemoveAllStatus();
 
 			RPGGame.RPGCurrent?.OnKilled( this );
 
