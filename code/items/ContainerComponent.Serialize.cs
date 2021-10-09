@@ -26,7 +26,7 @@ namespace RPG
 		{
 			switch ( propertyName )
 			{
-				case "Items":
+				case nameof( Items ):
 					var itemListConverter = options.GetConverter( typeof( List<Item> ) ) as JsonConverterListItem;
 					reader.Read();
 					Items.Clear();
