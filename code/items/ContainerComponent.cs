@@ -464,6 +464,41 @@ namespace RPG
 
 			return false;
 		}
+
+		/// <summary>Creates a loot bag and puts all our droppable items in it, if we have any.</summary>
+		public Entity CreateLootBag()
+		{
+			List<Item> toDrop = new();
+
+			foreach ( var item in ItemList )
+			{
+				if ( item.Data.IsBlessed )
+					continue;
+
+				toDrop.Add( item );
+			}
+
+			if ( toDrop.Count == 0 ) return null;
+
+			// TODO: Make and use a generic world container class and then a loot bag one so we can make it criminal to loot stuff you don't own.
+			// Loot bags should have no complex physics (just drop to ground) and no collisions with anything except the world.
+			// They should also have an auto-delete timer, limit of X per player, etc.
+			// Containers should not be an Item and their entities not an ItemEntity since we're not doing containers-in-containers (yet?)
+			ModelEntity ent = new();
+
+			if ( !ent.IsValid() ) return null;
+
+			var c = ent.Components.GetOrCreate<ContainerComponent>();
+			if ( c != null )
+			{
+				foreach ( var item in toDrop )
+					c.AddItem( item );
+			}
+
+			ent.Transform = GetDropTransform();
+
+			return ent;
+		}
 	}
 
 	public static class ContainerExtend
