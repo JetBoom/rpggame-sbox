@@ -119,9 +119,8 @@ namespace RPG
 
 		private void TakeStats()
 		{
-			var player = Owner as RPGPlayer;
-			player.AddMana( -GetManaCost() );
-			player.AddStamina( -GetStaminaCost() );
+			Owner.AddMana( -GetManaCost() );
+			Owner.AddStamina( -GetStaminaCost() );
 		}
 
 		public virtual bool GetCanBeCasted()
