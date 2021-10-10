@@ -291,6 +291,53 @@ namespace RPG
 			DebugHud();
 		}
 
+		public virtual void ServerSimulate( Client cl )
+		{
+			if ( LifeState == LifeState.Alive )
+			{
+				if ( TimeSinceHealthRegen >= RPGGlobals.HealthRegenRate )
+				{
+					TimeSinceHealthRegen = 0f;
+
+					var health = Health;
+					if ( health < HealthMax && health > 0f )
+						Health = MathF.Min( HealthMax, health + RPGGlobals.HealthRegenAmount );
+				}
+			}
+			else if ( LifeState == LifeState.Dying )
+			{
+				if ( TimeSinceIncapacitated >= RPGGlobals.PlayerBleedOutTime )
+				{
+					var info = new DamageInfo()
+						.WithAttacker( LastAttacker )
+						.WithWeapon( LastAttackerWeapon )
+					;
+					info.Damage = Health * 2f;
+					TakeDamage( info );
+				}
+			}
+			else if ( LifeState == LifeState.Dead )
+			{
+				if ( TimeSinceKilled > RPGGlobals.PlayerRespawnTime )
+					LifeState = LifeState.Respawnable;
+			}
+			else if ( LifeState == LifeState.Respawnable )
+			{
+				// TODO: Make this a menu that pops up later.
+				if ( Input.Pressed( InputButton.Attack1 ) )
+					ServerCmdRespawn();
+			}
+		}
+
+		public virtual void ClientSimulate( Client cl )
+		{
+			for ( int i = 0; i < InputSlotKeys.Length; ++i )
+			{
+				if ( Input.Pressed( InputSlotKeys[i] ) )
+					OnPressHotKey( i );
+			}
+		}
+
 		public override void Simulate( Client cl )
 		{
 			DebugHud();
@@ -299,62 +346,20 @@ namespace RPG
 				CalculateStatuses();
 
 			if ( IsServer )
-			{
-				if ( LifeState == LifeState.Alive )
-				{
-					if ( TimeSinceHealthRegen >= RPGGlobals.HealthRegenRate )
-					{
-						TimeSinceHealthRegen = 0f;
-
-						var health = Health;
-						if ( health < HealthMax && health > 0f )
-							Health = MathF.Min( HealthMax, health + RPGGlobals.HealthRegenAmount );
-					}
-				}
-				else if ( LifeState == LifeState.Dying )
-				{
-					if ( TimeSinceIncapacitated >= RPGGlobals.PlayerBleedOutTime )
-					{
-						var info = new DamageInfo()
-							.WithAttacker( LastAttacker )
-							.WithWeapon( LastAttackerWeapon )
-						;
-						info.Damage = Health * 2f;
-						TakeDamage( info );
-					}
-				}
-				else if ( LifeState == LifeState.Dead )
-				{
-					if ( TimeSinceKilled > RPGGlobals.PlayerRespawnTime )
-						LifeState = LifeState.Respawnable;
-				}
-				else if ( LifeState == LifeState.Respawnable )
-				{
-					// TODO: Make this a menu that pops up later.
-					if ( Input.Pressed( InputButton.Attack1 ) )
-						ServerCmdRespawn();
-				}
-			}
-
-			if ( IsClient )
-			{
-				for ( int i = 0; i < InputSlotKeys.Length; ++i )
-				{
-					if ( Input.Pressed( InputSlotKeys[i] ) )
-						OnPressHotKey( i );
-				}
-			}
+				ServerSimulate( cl );
+			else
+				ClientSimulate( cl );
 
 			//UpdatePhysicsHull();
 
+			// Movement controller
 			SimulateController( cl );
 
-			this.GetCastingAbility()?.Simulate( cl );
-
+			// Equipped weapon or other usable item
 			SimulateActiveChild( cl, ActiveChild );
 
-			if ( Input.Pressed( InputButton.Attack2 ) )
-				this.GetAbilityCasterComponent()?.TryStartAbility( cl.GetClientData( "ability_current", "ability_thorn" ) );
+			// Casting component and abilities
+			this.GetAbilityCasterComponent()?.Simulate( cl );
 		}
 
 		protected void SimulateController( Client cl )

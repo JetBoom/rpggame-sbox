@@ -108,6 +108,14 @@ namespace RPG
 			Abilities.Remove( ability );
 		}
 
+		public virtual void Simulate( Client cl )
+		{
+			CastingAbility?.Simulate( cl );
+
+			if ( Input.Pressed( InputButton.Attack2 ) )
+				TryStartAbility( cl.GetClientData( "ability_current", "ability_thorn" ) );
+		}
+
 		public virtual Ability GetAbilityInSlot( int i ) => Abilities.ElementAtOrDefault( i );
 
 		public Ability GetAbility( string abilityName ) => Abilities.Find( ability => ability.ClassInfo.Name == abilityName );
