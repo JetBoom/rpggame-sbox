@@ -7,9 +7,12 @@ namespace RPG
 	{
 		public static readonly float SideMoveDot = 0.5f;
 		public static readonly float BackMoveDot = 0.0f;
+		public static readonly float JumpPower = 320f;
+		public static readonly float JumpDuckPowerMul = 0.8f;
+		public static readonly float SwimUpSpeed = 100f;
 
-		public float SideSpeedMultiplier { get; set; } = 0.8f;
-		public float BackSpeedMultiplier { get; set; } = 0.666f;
+		public float SideSpeedMultiplier = 0.8f;
+		public float BackSpeedMultiplier = 0.666f;
 
 		public RPGWalkController() : base()
 		{
@@ -64,13 +67,12 @@ namespace RPG
 			Accelerate( wishdir, wishspeed, 0, Acceleration );
 			Velocity = Velocity.WithZ( 0 );
 
-			//   Player.SetAnimParam( "forward", Input.Forward );
-			//   Player.SetAnimParam( "sideward", Input.Right );
-			//   Player.SetAnimParam( "wishspeed", wishspeed );
-			//    Player.SetAnimParam( "walkspeed_scale", 2.0f / 190.0f );
-			//   Player.SetAnimParam( "runspeed_scale", 2.0f / 320.0f );
-
-			//  DebugOverlay.Text( 0, Pos + Vector3.Up * 100, $"forward: {Input.Forward}\nsideward: {Input.Right}" );
+			/*Player.SetAnimParam( "forward", Input.Forward );
+			Player.SetAnimParam( "sideward", Input.Right );
+			Player.SetAnimParam( "wishspeed", wishspeed );
+			Player.SetAnimParam( "walkspeed_scale", 2.0f / 190.0f );
+			Player.SetAnimParam( "runspeed_scale", 2.0f / 320.0f );
+			DebugOverlay.Text( 0, Pos + Vector3.Up * 100, $"forward: {Input.Forward}\nsideward: {Input.Right}" );*/
 
 			// Add in any base velocity to the current velocity.
 			Velocity += BaseVelocity;
@@ -108,38 +110,11 @@ namespace RPG
 
 		public override void CheckJumpButton()
 		{
-			//if ( !player->CanJump() )
-			//    return false;
-
-
-			/*
-			if ( player->m_flWaterJumpTime )
-			{
-				player->m_flWaterJumpTime -= gpGlobals->frametime();
-				if ( player->m_flWaterJumpTime < 0 )
-					player->m_flWaterJumpTime = 0;
-
-				return false;
-			}*/
-
-
-
-			// If we are in the water most of the way...
+			// TODO: Add some way to jump out of water while near an edge.
 			if ( Swimming )
 			{
-				// swimming, not jumping
 				ClearGroundEntity();
-
-				Velocity = Velocity.WithZ( 100 );
-
-				// play swimming sound
-				//  if ( player->m_flSwimSoundTime <= 0 )
-				{
-					// Don't play sound again for 1 second
-					//   player->m_flSwimSoundTime = 1000;
-					//   PlaySwimSound();
-				}
-
+				Velocity = Velocity.WithZ( SwimUpSpeed );
 				return;
 			}
 
@@ -150,48 +125,17 @@ namespace RPG
 			if ( DefaultSpeed < 32f )
 				return;
 
-			/*
-			if ( player->m_Local.m_bDucking && (player->GetFlags() & FL_DUCKING) )
-				return false;
-			*/
-
-			/*
-			// Still updating the eye position.
-			if ( player->m_Local.m_nDuckJumpTimeMsecs > 0u )
-				return false;
-			*/
-
 			ClearGroundEntity();
 
 			// player->PlayStepSound( (Vector &)mv->GetAbsOrigin(), player->m_pSurfaceData, 1.0, true );
 
-			// MoveHelper()->PlayerSetAnimation( PLAYER_JUMP );
-
-			float flGroundFactor = 1.0f;
-			//if ( player->m_pSurfaceData )
-			{
-				//   flGroundFactor = g_pPhysicsQuery->GetGameSurfaceproperties( player->m_pSurfaceData )->m_flJumpFactor;
-			}
-
-			float flMul = 268.3281572999747f * 1.2f;
-
-			float startz = Velocity.z;
-
+			float power = JumpPower;
 			if ( Duck.IsActive )
-				flMul *= 0.8f;
+				power *= JumpDuckPowerMul;
 
-			Velocity = Velocity.WithZ( startz + flMul * flGroundFactor );
-
-			Velocity -= new Vector3( 0, 0, Gravity * 0.5f ) * Time.Delta;
-
-			// mv->m_outJumpVel.z += mv->m_vecVelocity[2] - startz;
-			// mv->m_outStepHeight += 0.15f;
-
-			// don't jump again until released
-			//mv->m_nOldButtons |= IN_JUMP;
+			Velocity = Velocity.WithZ( Velocity.z + power - Gravity / 2f * Time.Delta );
 
 			AddEvent( "jump" );
-
 		}
 
 		/*private static RPGWalkController GetControllerFromCommand()
