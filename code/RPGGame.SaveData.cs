@@ -37,12 +37,17 @@ namespace RPG
 
 		public RPGPlayer LoadPlayer( Client client )
 		{
+			// TODO: If it's loading from a file, give them an invulnerability shield status that goes away on any kind of input or after a minute.
+
 			// Possess an already existing pawn, if there is one.
 			foreach ( var existingPawn in RPGPlayer.AllPlayers )
 			{
 				if ( existingPawn.LastOwnerSteamId == client.SteamId && existingPawn.Client == null && existingPawn.IsValid() )
 				{
 					client.Pawn = existingPawn;
+
+					existingPawn.RemoveStatus<StatusLogout>();
+
 					return existingPawn;
 				}
 			}

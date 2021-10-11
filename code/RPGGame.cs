@@ -54,8 +54,6 @@ namespace RPG
 		{
 			base.ClientJoined( client );
 
-			// TODO: Load pawn data from file OR make this client possess an already existing pawn that they owned when they disconnected.
-			// TODO: If it's loading from a file, give them an invulnerability shield status that goes away on any kind of input or after a minute.
 			LoadPlayer( client );
 
 			UserPermissions.UpdateUserPermissionsComponent( client );
@@ -70,8 +68,15 @@ namespace RPG
 
 			if ( cl.Pawn.IsValid() )
 			{
-				cl.Pawn.Delete();
-				cl.Pawn = null;
+				if ( RPGGlobals.PlayerLogoutTime > 0f && cl.Pawn is RPGPlayer player )
+				{
+					player.AddStatus<StatusLogout>();
+				}
+				else
+				{
+					cl.Pawn.Delete();
+					cl.Pawn = null;
+				}
 			}
 		}
 

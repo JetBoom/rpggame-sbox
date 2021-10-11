@@ -21,6 +21,9 @@
 
 		public static readonly float SaveWorldTime = 120f;
 
+		/// <summary>Players stay in the world for this much time after disconnecting. If they reconnect then they repossess the already existing pawn.</summary>
+		public static readonly float PlayerLogoutTime = 60f;
+
 		/// <summary>Time to actually respawn. This is when the screen fades to black and you're given a respawn screen.</summary>
 		public static readonly float PlayerRespawnTime = 3f;
 		/// <summary>Time to bleed out. The player will automatically go from dying to dead state.</summary>
