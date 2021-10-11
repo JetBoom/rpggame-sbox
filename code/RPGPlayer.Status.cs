@@ -60,6 +60,19 @@ namespace RPG
 				Components.Remove( status );
 		}
 
+		public bool RemoveStatus<T>() where T : Status
+		{
+			var status = GetStatus<T>();
+			if ( status != null )
+			{
+				status.Enabled = false;
+				status.Remove();
+				return true;
+			}
+
+			return false;
+		}
+
 		[Event.Hotload]
 		public void InvalidateStatus() => NeedsStatusCalculation = true;
 
