@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RPG
 {
 	[Library( "status_base", Group = "base" )]
-	public abstract partial class Status : EntityComponent<RPGPlayer>
+	public abstract partial class Status : EntityComponent
 	{
 		[Net]
 		public float Magnitude { get; set; } = 1f;
@@ -57,6 +57,71 @@ namespace RPG
 
 	public static class StatusExtend
 	{
+		public static Status AddStatus<T>( this Entity self, float magnitude = 1f ) where T : Status, new()
+		{
+			Host.AssertServer();
 
+			var usemods = self as IUseStatusMods;
+
+			var existing = self.GetStatus<T>();
+			if ( existing != null && !existing.Data.CanStack )
+			{
+				existing.Magnitude = MathF.Max( magnitude, existing.Magnitude );
+				existing.StartTime = Time.Now;
+				existing.Duration = existing.Data.BaseDuration;
+
+				if ( usemods != null )
+					usemods.InvalidateStatus();
+
+				return existing;
+			}
+
+			var status = self.Components.Create<T>();
+			if ( status == null ) return null;
+
+			status.Magnitude = magnitude;
+			status.StartTime = Time.Now;
+			status.Duration = status.Data.BaseDuration;
+
+			if ( usemods != null )
+				usemods.InvalidateStatus();
+
+			return status;
+		}
+
+		public static bool HasStatus<T>( this Entity self ) where T : Status
+		{
+			return self.GetStatus<T>() != null;
+		}
+
+		public static Status GetStatus<T>( this Entity self ) where T : Status
+		{
+			return self.Components.Get<T>();
+		}
+
+		public static IEnumerable<Status> GetAllStatus( this Entity self )
+		{
+			return self.Components.GetAll<Status>();
+		}
+
+		public static void RemoveAllStatus( this Entity self )
+		{
+			var statuses = self.GetAllStatus();
+			foreach ( var status in statuses )
+				self.Components.Remove( status );
+		}
+
+		public static bool RemoveStatus<T>( this Entity self ) where T : Status
+		{
+			var status = self.GetStatus<T>();
+			if ( status != null )
+			{
+				status.Enabled = false;
+				status.Remove();
+				return true;
+			}
+
+			return false;
+		}
 	}
 }

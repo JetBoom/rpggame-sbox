@@ -70,7 +70,7 @@ namespace RPG
 			{
 				StopUsing();
 				this.GetCastingAbility()?.Finish( AbilityResult.GenericFail );
-				RemoveAllStatus();
+				this.RemoveAllStatus();
 			}
 
 			if ( state == LifeState ) return;
@@ -138,7 +138,7 @@ namespace RPG
 			EnableShadowInFirstPerson = true;
 
 			//DeleteAbilities();
-			//RemoveAllStatus();
+			//this.RemoveAllStatus();
 
 			Health = HealthMax;
 			Velocity = Vector3.Zero;

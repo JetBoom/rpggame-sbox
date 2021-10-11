@@ -94,6 +94,11 @@ namespace RPG
 		public float Alter( bool additionFirst = false ) => Alter( 0f, additionFirst );
 	}
 
+	public interface IUseStatusMods
+	{
+		public void InvalidateStatus() { }
+	}
+
 	public class StatusModifications
 	{
 		public List<StatusMod> List;

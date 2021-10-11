@@ -6,72 +6,9 @@ using System.Linq;
 
 namespace RPG
 {
-	public partial class RPGPlayer
+	public partial class RPGPlayer : IUseStatusMods
 	{
 		protected bool NeedsStatusCalculation { get; set; }
-
-		public virtual Status AddStatus<T>( float magnitude = 1f ) where T : Status, new()
-		{
-			Host.AssertServer();
-
-			var existing = GetStatus<T>();
-			if ( existing != null && !existing.Data.CanStack )
-			{
-				existing.Magnitude = MathF.Max( magnitude, existing.Magnitude );
-				existing.StartTime = Time.Now;
-				existing.Duration = existing.Data.BaseDuration;
-
-				InvalidateStatus();
-
-				return existing;
-			}
-
-			var status = Components.Create<T>();
-			if ( status == null ) return null;
-
-			status.Magnitude = magnitude;
-			status.StartTime = Time.Now;
-			status.Duration = status.Data.BaseDuration;
-
-			InvalidateStatus();
-
-			return status;
-		}
-
-		public bool HasStatus<T>() where T : Status
-		{
-			return GetStatus<T>() != null;
-		}
-
-		public Status GetStatus<T>() where T : Status
-		{
-			return Components.Get<T>();
-		}
-
-		public IEnumerable<Status> GetAllStatus()
-		{
-			return Components.GetAll<Status>();
-		}
-
-		public void RemoveAllStatus()
-		{
-			var statuses = GetAllStatus();
-			foreach ( var status in statuses )
-				Components.Remove( status );
-		}
-
-		public bool RemoveStatus<T>() where T : Status
-		{
-			var status = GetStatus<T>();
-			if ( status != null )
-			{
-				status.Enabled = false;
-				status.Remove();
-				return true;
-			}
-
-			return false;
-		}
 
 		[Event.Hotload]
 		public void InvalidateStatus() => NeedsStatusCalculation = true;
@@ -85,7 +22,7 @@ namespace RPG
 			StatusModifications mods = new();
 
 			// Any ongoing status effects
-			foreach ( var status in GetAllStatus() )
+			foreach ( var status in this.GetAllStatus() )
 				status.ContributeModifications( mods );
 
 			// Equipment such as the active weapon, worn armor, etc.
