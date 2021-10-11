@@ -53,7 +53,7 @@ namespace RPG
 		[ConVar.ClientData( "ability_current" )]
 		public string SelectedAbilityName { get; set; } = "";
 
-		public IReadOnlyList<Ability> SchoolAbilities => Abilities.FindAll( ability => ability.Data.School > Schools.Common );
+		public IReadOnlyList<Ability> SchoolAbilities => (IReadOnlyList<Ability>)Abilities.FindAll( ability => ability.Data.School > Schools.Common );
 		public int SchoolAbilityCount => SchoolAbilities.Count;
 
 		private Ability LastCastingAbility;
