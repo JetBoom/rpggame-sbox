@@ -46,6 +46,8 @@ namespace RPG
 						break;
 					case StatusModType.MaxHealth:
 						HealthMax = mod.Alter( 60 + 40 * GetSkillFrac( SkillType.Vitality ) );
+						if ( Health > HealthMax )
+							Health = HealthMax;
 						break;
 					case StatusModType.MaxStamina:
 						this.SetStaminaMax( mod.Alter( 100f ) );
