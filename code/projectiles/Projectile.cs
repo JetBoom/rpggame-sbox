@@ -20,15 +20,15 @@ namespace RPG
 
 		protected ProjectileMovement Movement;
 
-		private Vector3 LastPosition;
-		private bool Hit;
-		private float TimeLeft;
+		protected Vector3 LastPosition;
+		protected bool Hit;
+		protected TimeSince TimeSinceCreation;
 
 		public Projectile() : base()
 		{
 			Predictable = false;
 
-			TimeLeft = LifeTime;
+			TimeSinceCreation = 0f;
 
 			Movement = CreateMovement();
 		}
@@ -78,8 +78,7 @@ namespace RPG
 			}
 			else
 			{
-				TimeLeft -= Time.Delta;
-				if ( TimeLeft <= 0f )
+				if ( TimeSinceCreation >= LifeTime )
 				{
 					if ( HitOnExpire )
 					{
