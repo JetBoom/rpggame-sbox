@@ -18,6 +18,9 @@ namespace RPG
 
 		protected virtual ProjectileMovement CreateMovement() => new ProjectileMovement( this );
 
+		protected virtual string SoundHit => null;
+		protected virtual string SoundExpire => null;
+
 		protected ProjectileMovement Movement;
 
 		protected Vector3 LastPosition;
@@ -99,10 +102,14 @@ namespace RPG
 
 		protected virtual void OnHit( ref TraceResult tr )
 		{
+			if ( !string.IsNullOrEmpty( SoundHit ) )
+				Sound.FromWorld( SoundHit, tr.EndPos );
 		}
 
 		protected virtual void OnExpire()
 		{
+			if ( !string.IsNullOrEmpty( SoundExpire ) )
+				Sound.FromWorld( SoundExpire, Position );
 		}
 
 		public static Projectile CreateProjectile( string className ) => Library.Create<Projectile>( className );
