@@ -15,8 +15,7 @@ namespace RPG
 		{
 			base.OnProcess();
 
-			if ( Owner is AnimEntity anim )
-				anim.SetAnimBool( "b_attack", true );
+			PlaySuccessAnim();
 
 			if ( Host.IsServer )
 				Projectile.FireProjectileFrom( "projectile_thorn", Owner );

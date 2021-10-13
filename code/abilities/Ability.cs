@@ -49,6 +49,9 @@ namespace RPG
 		public virtual bool CanCastThroughSilence => Data.School <= Schools.Common;
 		public virtual bool GetCanCastWithWeapon( ItemWeaponEntity wep ) => true;
 
+		protected virtual string SuccessAnimParam => "b_attack";
+		protected virtual string FailureAnimParam => null;
+
 		private Sound LoopSound;
 		//private Entity CastingEffectEntity;
 
@@ -100,11 +103,27 @@ namespace RPG
 		protected virtual void OnSuccess()
 		{
 			Assert.True( IsAuthority );
+
+			PlaySuccessAnim();
+		}
+
+		protected virtual void PlaySuccessAnim()
+		{
+			if ( Owner is AnimEntity anim && !string.IsNullOrEmpty( SuccessAnimParam ) )
+				anim.SetAnimBool( SuccessAnimParam, true );
 		}
 
 		protected virtual void OnFailure( AbilityResult reason = AbilityResult.GenericFail )
 		{
 			Assert.True( IsAuthority );
+
+			PlayFailureAnim();
+		}
+
+		protected virtual void PlayFailureAnim()
+		{
+			if ( Owner is AnimEntity anim && !string.IsNullOrEmpty( SuccessAnimParam ) )
+				anim.SetAnimBool( FailureAnimParam, true );
 		}
 
 		protected virtual void StartAnimator( PawnAnimator anim )
