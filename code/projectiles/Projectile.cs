@@ -16,6 +16,10 @@ namespace RPG
 		public bool UseHitboxes { get; set; } = false;
 		public bool HitOnExpire { get; set; } = false;
 
+		protected virtual ProjectileMovement CreateMovement() => new ProjectileMovement( this );
+
+		protected ProjectileMovement Movement;
+
 		private Vector3 LastPosition;
 		private bool Hit;
 		private float TimeLeft;
@@ -25,6 +29,8 @@ namespace RPG
 			Predictable = false;
 
 			TimeLeft = LifeTime;
+
+			Movement = CreateMovement();
 		}
 
 		public override void Spawn()
@@ -42,25 +48,12 @@ namespace RPG
 			EnableAllCollisions = false;
 		}
 
-		protected virtual void DoPhysics()
-		{
-			var vel = Rotation.Forward * Speed;
-			Velocity = vel;
-			//Position += vel * Time.Delta;
-		}
-
 		[Event.Tick.Server]
-		public virtual void OnServerTick()
+		public virtual void OnTickServer()
 		{
 			if ( Hit ) return;
 
-			if ( LastPosition == Vector3.Zero )
-			{
-				LastPosition = Position;
-				return;
-			}
-
-			DoPhysics();
+			Movement?.Move();
 
 			//DebugOverlay.Sphere( Position, 1f, Color.Green, true, 1f );
 
