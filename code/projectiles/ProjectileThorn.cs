@@ -6,6 +6,14 @@ namespace RPG
 	[Library( "projectile_thorn" )]
 	public partial class ProjectileThorn : ProjectileDamage
 	{
+		public override float DamageRadius => 0f;
+		public override float Speed => 2000f;
+		public override bool UseHitboxes => false;
+		public override bool HitOnExpire => false;
+		public override float BaseDamage => 5f;
+
+		protected override float LifeTime => 3f;
+
 		protected override string SoundHit => "projectile.thorn.hit";
 		protected override string SoundExpire => "projectile.generic.expire";
 
@@ -13,12 +21,6 @@ namespace RPG
 
 		public ProjectileThorn() : base()
 		{
-			Damage = 5f;
-			DamageRadius = 0f;
-			Speed = 2000f;
-			LifeTime = 3f;
-			UseHitboxes = false;
-			HitOnExpire = false;
 		}
 
 		public override void Spawn()

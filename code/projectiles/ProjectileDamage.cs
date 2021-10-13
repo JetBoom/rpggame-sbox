@@ -10,12 +10,11 @@ namespace RPG
 {
 	public abstract partial class ProjectileDamage : Projectile
 	{
-		public float Damage { get; set; } = 10f;
-		public float DamageRadius { get; set; } = 0f;
-
-		public virtual bool RadiusOnlyAffectPlayers => false;
+		public virtual float BaseDamage => 10f;
+		public virtual float DamageRadius => 0f;
 		public virtual DamageType DamageType => DamageType.Generic;
-		public virtual DamageFlags DamageFlags { get; set; } = DamageFlags.Blunt;
+		public virtual DamageFlags DamageFlags => DamageFlags.Blunt;
+		public virtual bool RadiusOnlyAffectPlayers => false;
 
 		public ProjectileDamage() : base()
 		{
@@ -25,16 +24,14 @@ namespace RPG
 		{
 			base.OnHit( ref tr );
 
-			DebugOverlay.Sphere( tr.EndPos, 4f, Color.Red, true, 1f );
-
 			if ( DamageRadius <= 0f )
 			{
 				if ( tr.Entity.IsValid() )
-					ApplyDamage( ref tr, tr.Entity, Damage );
+					ApplyDamage( ref tr, tr.Entity, BaseDamage );
 			}
 			else
 			{
-				ApplyRadialDamage( ref tr, Damage );
+				ApplyRadialDamage( ref tr, BaseDamage );
 			}
 		}
 

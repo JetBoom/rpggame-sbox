@@ -10,11 +10,10 @@ namespace RPG
 {
 	public abstract partial class Projectile : ModelEntity
 	{
-		public float Speed { get; set; } = 800f;
-		public float Radius { get; set; } = 0f;
-		public float LifeTime { get; set; } = 5f;
-		public bool UseHitboxes { get; set; } = false;
-		public bool HitOnExpire { get; set; } = false;
+		public virtual float Speed => 800f;
+		public virtual float Radius => 0f;
+		public virtual bool UseHitboxes => false;
+		public virtual bool HitOnExpire => false;
 
 		protected virtual ProjectileMovement CreateMovement() => new ProjectileMovement( this );
 
@@ -26,6 +25,9 @@ namespace RPG
 		protected Vector3 LastPosition;
 		protected bool Hit;
 		protected TimeSince TimeSinceCreation;
+		protected virtual float LifeTime => 5f;
+
+		public float LifeTimeLeft => LifeTime - TimeSinceCreation;
 
 		public Projectile() : base()
 		{
