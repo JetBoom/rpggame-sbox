@@ -38,6 +38,22 @@ namespace RPG
 		{
 		}
 
+		/// <summary>Call this instead of .Remove directly since it contains extra logic.</summary>
+		public void RemoveStatus()
+		{
+			Host.AssertServer();
+
+			Enabled = false;
+			OnRemoved();
+
+			if ( Entity is IUseStatusMods modder )
+				modder.InvalidateStatus();
+
+			Remove();
+		}
+
+		protected virtual void OnRemoved() {}
+
 		public virtual float GetMagnitude()
 		{
 			return Data.BaseMagnitude * Magnitude;
@@ -108,7 +124,7 @@ namespace RPG
 		{
 			var statuses = self.GetAllStatus();
 			foreach ( var status in statuses )
-				self.Components.Remove( status );
+				status.RemoveStatus();
 		}
 
 		public static bool RemoveStatus<T>( this Entity self ) where T : Status
@@ -116,8 +132,8 @@ namespace RPG
 			var status = self.GetStatus<T>();
 			if ( status != null )
 			{
-				status.Enabled = false;
-				status.Remove();
+				status.RemoveStatus();
+
 				return true;
 			}
 
