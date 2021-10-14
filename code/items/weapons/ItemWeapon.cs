@@ -47,7 +47,7 @@ namespace RPG
 		//public override bool ShouldBoneMerge => true;
 		public override string AttachmentName => "hold_R";
 
-		public virtual ModelEntity EffectEntity => (ViewModelEntity.IsValid() && IsFirstPersonMode) ? ViewModelEntity : this;
+		public virtual ModelEntity EffectEntity => ( IsFirstPersonMode && ViewModelEntity.IsValid() ) ? ViewModelEntity : this;
 
 		public override bool IsInUse => Owner.IsValid() && Owner.GetIsCasting();
 
@@ -100,9 +100,10 @@ namespace RPG
 				var animator = player.GetActiveAnimator();
 				if ( animator != null )
 					SimulateAnimator( animator );
-
-				player.InvalidateStatus();
 			}
+
+			if ( ent is IUseStatusMods modder )
+				modder.InvalidateStatus();
 
 			//
 			// If we're the local player (clientside) create viewmodel
@@ -124,8 +125,8 @@ namespace RPG
 		{
 			base.ActiveEnd( ent, dropped );
 
-			if ( ent is RPGPlayer player )
-				player.InvalidateStatus();
+			if ( ent is IUseStatusMods modder )
+				modder.InvalidateStatus();
 
 			// If we're just holstering, then hide us
 			if ( !dropped )
@@ -156,6 +157,8 @@ namespace RPG
 			if ( string.IsNullOrEmpty( WeaponData.ViewModel ) )
 				return;
 
+			DestroyViewModel();
+
 			ViewModelEntity = new BaseViewModel();
 			ViewModelEntity.Position = Position;
 			ViewModelEntity.Owner = Owner;
@@ -165,6 +168,8 @@ namespace RPG
 
 		public virtual void DestroyViewModel()
 		{
+			Host.AssertClient();
+
 			ViewModelEntity?.Delete();
 			ViewModelEntity = null;
 		}

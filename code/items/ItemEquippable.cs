@@ -46,8 +46,8 @@ namespace RPG
 		{
 			ItemEquippable.IsEquipped = true;
 
-			if ( ent is RPGPlayer player )
-				player.InvalidateStatus();
+			if ( ent is IUseStatusMods modder )
+				modder.InvalidateStatus();
 
 			base.ActiveStart( ent );
 		}
@@ -56,8 +56,8 @@ namespace RPG
 		{
 			ItemEquippable.IsEquipped = false;
 
-			if ( ent is RPGPlayer player )
-				player.InvalidateStatus();
+			if ( ent is IUseStatusMods modder )
+				modder.InvalidateStatus();
 
 			base.ActiveEnd( ent, dropped );
 		}
