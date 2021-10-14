@@ -30,6 +30,9 @@ namespace RPG
 	[Library( Group = "base" )]
 	public abstract partial class ItemWeapon : ItemEquippable
 	{
+		private WeaponData _WeaponData;
+		public WeaponData WeaponData => _WeaponData == null ? _WeaponData = WeaponData.ResourceFor( ClassInfo.Name ) : _WeaponData;
+
 		public override EquipSlot Slot => EquipSlot.Weapon;
 	}
 
@@ -37,8 +40,7 @@ namespace RPG
 	[Library( Group = "base" )]
 	public abstract partial class ItemWeaponEntity : ItemEquippableEntity
 	{
-		private WeaponData _WeaponData;
-		public WeaponData WeaponData => _WeaponData == null ? _WeaponData = WeaponData.ResourceFor( ClassInfo.Name ) : _WeaponData;
+		public WeaponData WeaponData => (Item as ItemWeapon)?.WeaponData;
 
 		public BaseViewModel ViewModelEntity { get; protected set; }
 
