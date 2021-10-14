@@ -53,7 +53,6 @@ namespace RPG
 		protected virtual string FailureAnimParam => null;
 
 		private Sound LoopSound;
-		//private Entity CastingEffectEntity;
 
 		public Ability() : base()
 		{
@@ -83,15 +82,6 @@ namespace RPG
 				LoopSound.Stop();
 				LoopSound = Sound.FromEntity( Data.LoopSoundPath, Owner );
 			}
-
-			/*if ( CastingEffectEntity != null ) return;
-
-			CastingEffectEntity = Library.Create<CastingEffect>( CastingEffectClass );
-			if ( CastingEffectEntity.IsValid() )
-			{
-				CastingEffectEntity.Owner = Owner;
-				CastingEffectEntity.SetParent( Owner, null, Owner.Transform );
-			}*/
 		}
 
 		public virtual void RemoveCastingEffects()
