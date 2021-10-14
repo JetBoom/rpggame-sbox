@@ -72,7 +72,7 @@ namespace RPG
 			return Physics.GetEntitiesInSphere( pos, radius )
 			.Where( ent =>
 			{
-				if ( ent == this || ent.Health <= 0f ) return false;
+				if ( ent == this || ent.GetHealth() <= 0f ) return false;
 				if ( onlyPlayers && !(ent is RPGPlayer) ) return false;
 				if ( !throughWalls && ent.IsRadialDamageVisible( pos, this ) ) return false;
 

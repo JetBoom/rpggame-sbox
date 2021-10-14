@@ -45,9 +45,7 @@ namespace RPG
 							walk.SetSpeed( mod.Alter( RPGGlobals.BaseWalkSpeed ) );
 						break;
 					case StatusModType.MaxHealth:
-						HealthMax = mod.Alter( 60 + 40 * GetSkillFrac( SkillType.Vitality ) );
-						if ( Health > HealthMax )
-							Health = HealthMax;
+						this.SetHealthMax( mod.Alter( 60 + 40 * GetSkillFrac( SkillType.Vitality ) ) );
 						break;
 					case StatusModType.MaxStamina:
 						this.SetStaminaMax( mod.Alter( 100f ) );

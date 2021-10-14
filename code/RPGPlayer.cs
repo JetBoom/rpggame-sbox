@@ -26,9 +26,6 @@ namespace RPG
 			InputButton.Slot0,
 		};
 
-		[Net]
-		public float HealthMax { get; set; } = 100f;
-
 		public DamageInfo LastDamageInfo { get; protected set; }
 		public float LastDamage { get; protected set; }
 		public DamageType LastDamageType { get; protected set; }
@@ -46,12 +43,11 @@ namespace RPG
 		{
 			_AllPlayers.Add( this );
 
-			//Health = HealthMax = 60.0f;
-
 			if ( IsServer )
 			{
 				Components.GetOrCreate<AbilityCasterComponent>();
 				Components.GetOrCreate<ContainerComponent>();
+				Components.GetOrCreate<HealthComponent>();
 				Components.GetOrCreate<ManaComponent>();
 				Components.GetOrCreate<StaminaComponent>();
 				Components.GetOrCreate<ResistancesComponent>();
@@ -104,7 +100,7 @@ namespace RPG
 			CreateHull();
 			WaterLevel.Clear();
 
-			Health = HealthMax;
+			this.SetHealth( this.GetHealthMax() );
 
 			EnableAllCollisions = true;
 			EnableDrawing = true;
@@ -140,7 +136,7 @@ namespace RPG
 			//DeleteAbilities();
 			//this.RemoveAllStatus();
 
-			Health = HealthMax;
+			this.SetHealth( this.GetHealthMax() );
 			Velocity = Vector3.Zero;
 			WaterLevel.Clear();
 
@@ -254,7 +250,7 @@ namespace RPG
 			DebugOverlay.ScreenText( pos, line++, col, $"User level: {Client?.GetUserLevel()}" );
 			DebugOverlay.ScreenText( pos, line++, col, $"Permissions: {Client?.GetPermissions()}" );
 
-			DebugOverlay.ScreenText( pos, line++, col, $"Health max: {HealthMax}" );
+			DebugOverlay.ScreenText( pos, line++, col, $"Health max: {this.GetHealthMax()}" );
 
 			/*DebugOverlay.ScreenText( pos, line++, col, $"Mana component: {Components.Get<ManaComponent>()}" );
 			DebugOverlay.ScreenText( pos, line++, col, $"Mana max: {this.GetManaMax()}" );
@@ -299,9 +295,8 @@ namespace RPG
 				{
 					TimeSinceHealthRegen = 0f;
 
-					var health = Health;
-					if ( health < HealthMax && health > 0f )
-						Health = MathF.Min( HealthMax, health + RPGGlobals.HealthRegenAmount );
+					if ( Health > 0f )
+						this.AddHealth( RPGGlobals.HealthRegenAmount );
 				}
 			}
 			else if ( LifeState == LifeState.Dying )
@@ -389,7 +384,7 @@ namespace RPG
 			TimeSinceIncapacitated = 0f;
 
 			// Do this for now. Later might want to make it like ganking instead of just hitting them again.
-			Health = Math.Min( HealthMax, 50f );
+			this.SetHealth( Math.Min( this.GetHealthMax(), 50f ) );
 
 			RPGGame.RPGCurrent?.OnIncapacitated( this );
 

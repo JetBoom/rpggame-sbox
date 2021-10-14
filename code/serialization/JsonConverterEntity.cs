@@ -74,7 +74,7 @@ namespace RPG
 							break;
 						case "Health":
 							reader.Read();
-							ent.Health = (float)reader.GetDecimal();
+							ent.SetHealth( (float)reader.GetDecimal() );
 							break;
 						case "Mana":
 							reader.Read();
@@ -132,7 +132,7 @@ namespace RPG
 			if ( ent is RPGPlayer )
 				writer.WriteString( "LifeState", ent.LifeState.ToString() );
 
-			if ( ent.Health > 0f )
+			if ( ent.GetHealth() > 0f )
 				writer.WriteNumber( "Health", ent.Health );
 
 			var mana = ent.GetMana();

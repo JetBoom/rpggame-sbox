@@ -36,8 +36,8 @@ namespace RPG
 				if ( Entity.IsValid() )
 				{
 					var magnitude = GetMagnitude() / TotalStacks;
-					if ( HealthToGive > 0f && Entity is RPGPlayer player )
-						Entity.Health = Math.Min( Entity.Health + HealthToGive * magnitude, player.HealthMax );
+					if ( HealthToGive > 0f )
+						Entity.AddHealth( HealthToGive * magnitude );
 					if ( StaminaToGive > 0f )
 						Entity.AddStamina( StaminaToGive * magnitude );
 					if ( ManaToGive > 0f )

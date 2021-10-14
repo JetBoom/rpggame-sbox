@@ -85,7 +85,7 @@ namespace RPG.UI
 				switch ( StatType )
 				{
 					case StatTypes.Health:
-						return target.Health;
+						return target.GetHealth();
 					case StatTypes.Stamina:
 						return target.GetStamina();
 					case StatTypes.Mana:
@@ -104,7 +104,7 @@ namespace RPG.UI
 				switch ( StatType )
 				{
 					case StatTypes.Health:
-						return target is RPGPlayer player ? player.HealthMax : 100f;
+						return target.GetHealthMax();
 					case StatTypes.Stamina:
 						return target.GetStaminaMax();
 					case StatTypes.Mana:
