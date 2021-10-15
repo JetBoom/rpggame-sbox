@@ -7,7 +7,13 @@ namespace RPG
 	public partial class HealthComponent : EntityComponent
 	{
 		[Net]
-		public float Max { get; set; }
+		public float Max { get; set; } = 100f;
+
+		public HealthComponent() : base()
+		{
+			if ( Max < 1f )
+				Max = 1f;
+		}
 	}
 
 	public static class HealthComponentExtend
