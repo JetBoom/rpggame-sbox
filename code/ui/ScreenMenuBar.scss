@@ -1,0 +1,16 @@
+﻿ScreenMenuBar {
+	position: absolute;
+	left: 0px;
+	width: 100%;
+	flex-direction: row;
+	background-color: rgba(black, 0.9);
+	min-height: 48px;
+
+	&:not(.bottom) {
+		top: 0px;
+	}
+
+	&.bottom {
+		bottom: 0px;
+	}
+}

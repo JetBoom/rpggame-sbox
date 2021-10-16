@@ -9,6 +9,8 @@ namespace RPG
 	{
 		public static RPGHudEntity Current { get; protected set; }
 		public InteractiveRootPanel InteractiveRoot { get; protected set; }
+		public ScreenMenuBar ScreenMenuTop { get; protected set; }
+		public ScreenMenuBar ScreenMenuBottom { get; protected set; }
 
 		public RPGHudEntity()
 		{
@@ -16,7 +18,7 @@ namespace RPG
 
 			if ( !IsClient ) return;
 
-			//RootPanel.StyleSheet.Load( "/ui/rpghud.scss" );
+			RootPanel.StyleSheet.Load( "/RPGHud.scss" );
 			//RootPanel.SetTemplate( "/rpghud.html" );
 
 			RootPanel.AddChild<NameTags>();
@@ -35,6 +37,12 @@ namespace RPG
 			//RootPanel.AddChild<Scoreboard<ScoreboardEntry>>();
 
 			InteractiveRoot = RootPanel.AddChild<InteractiveRootPanel>();
+
+			ScreenMenuTop = InteractiveRoot.AddChild<ScreenMenuBar>();
+			ScreenMenuTop.SetBottom( false );
+
+			ScreenMenuBottom = InteractiveRoot.AddChild<ScreenMenuBar>();
+			ScreenMenuBottom.SetBottom( true );
 		}
 	}
 }
