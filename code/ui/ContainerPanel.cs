@@ -15,7 +15,7 @@ namespace RPG.UI
 		public int NetId { get; protected set; }
 		public ContainerComponent Container { get; protected set; }
 
-		protected RPGLabel LabelName;
+		protected Label LabelName;
 
 		public static ContainerPanel GetPanelFor( int netid )
 		{
@@ -50,7 +50,7 @@ namespace RPG.UI
 		{
 			StyleSheet.Load( "/ui/ContainerPanel.scss" );
 
-			LabelName = Add.RPGLabel( "", "name" );
+			LabelName = Add.Label( "", "name" );
 		}
 
 		public override void Delete( bool immediate = false )
