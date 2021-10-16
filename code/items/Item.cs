@@ -18,8 +18,6 @@ namespace RPG
 		private ItemData _Data;
 		public ItemData Data => _Data == null ? _Data = Resource.FromPath<ItemData>( $"data/items/{ClassInfo.Name}.item" ) : _Data;
 
-		public virtual bool EntityShouldExistInContainer => false;
-
 		public ContainerComponent Container { get; set; }
 		public ItemEntity ItemEntity;
 		public Entity OwnerEntity => Container?.Entity;
@@ -74,60 +72,28 @@ namespace RPG
 		}
 
 		/// <summary>Spawns an ItemEntity and then sets its Item to this. If the entity already exists then just returns the already existing entity.</summary>
-		public ItemEntity ToEntity()
+		public ItemEntity ToEntity( bool removeFromContainer = true )
 		{
+			Host.AssertServer();
+
 			if ( ItemEntity.IsValid() ) return ItemEntity;
 
 			var ent = Library.Create<ItemEntity>( $"ent_{ClassInfo.Name}" );
 			if ( ent.IsValid() )
 			{
-				Container?.RemoveItem( this );
+				if ( removeFromContainer )
+					Container?.RemoveItem( this );
 				ent.Item = this;
 			}
 
 			return ent;
 		}
 
-		/*public void TransferTo( ContainerComponent container )
-		{
-			if ( Container == container ) return;
-
-			var oldplayer = OwnerPlayer;
-
-			Container?.RemoveItem( this );
-			Container = container;
-
-			if ( container != null && !container.Contains( this ) )
-				container.AddItem( this, true );
-
-			if ( ItemEntity.IsValid() )
-			{
-				if ( container != null && !container.ItemEntities.Contains( ItemEntity ) )
-					container.ItemEntities.Add( ItemEntity );
-
-				ItemEntity?.RefreshState();
-			}
-
-			if ( this is ItemEquippable )
-			{
-				oldplayer?.InvalidateStatus();
-				OwnerPlayer?.InvalidateStatus();
-			}
-		}
-
-		public void TransferToEntity( Entity owner )
-		{
-			if ( !owner.IsValid() ) return;
-
-			var container = owner.GetContainer();
-			if ( container != null )
-				TransferTo( container );
-		}*/
-
 		public void Delete()
 		{
-			if ( Host.IsServer )
-				ItemEntity?.Delete();
+			Host.AssertServer();
+
+			ItemEntity?.Delete();
 
 			Container?.RemoveItem( this );
 		}
@@ -157,7 +123,10 @@ namespace RPG
 
 			var container = ent.GetContainer();
 			if ( container != null )
-				return container.GetItemByNetId( netid ); ;
+			{
+				var item = container.GetItemByNetId( netid );
+				if ( item != null ) return item;
+			}
 
 			if ( ent is ItemEntity itement && itement.Item?.NetworkIdentity == netid )
 				return itement.Item;

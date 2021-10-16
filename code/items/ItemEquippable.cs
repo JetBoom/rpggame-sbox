@@ -22,7 +22,7 @@ namespace RPG
 
 		public virtual EquipSlot Slot => EquipSlot.Head;
 
-		public override bool EntityShouldExistInContainer => true;
+		public virtual bool EntityShouldExistInContainer => IsEquipped || Slot == EquipSlot.Weapon;
 
 		/*public override void OnDroppedFromInventory( RPGPlayer player, Entity oldOwner )
 		{
@@ -34,6 +34,37 @@ namespace RPG
 		public virtual void ContributeModifications( StatusModifications mods )
 		{
 		}
+
+		public virtual void OnEquipped()
+		{
+			if ( OwnerEntity is IUseStatusMods modder )
+				modder.InvalidateStatus();
+
+			if ( Host.IsServer )
+				RefreshEntity();
+		}
+
+		public virtual void OnUnequipped()
+		{
+			if ( OwnerEntity is IUseStatusMods modder )
+				modder.InvalidateStatus();
+
+			if ( Host.IsServer )
+				RefreshEntity();
+		}
+
+		protected void RefreshEntity()
+		{
+			Host.AssertServer();
+
+			if ( EntityShouldExistInContainer )
+			{
+				var ent = ToEntity( false );
+				ent?.RefreshState();
+			}
+			else
+				ItemEntity?.Delete();
+		}
 	}
 
 	/// <summary>An item which can be put in an equipment slot.</summary>
@@ -41,6 +72,8 @@ namespace RPG
 	public abstract partial class ItemEquippableEntity : ItemEntity
 	{
 		public ItemEquippable ItemEquippable => Item as ItemEquippable;
+
+		public bool EntityShouldExistInContainer => ItemEquippable?.EntityShouldExistInContainer ?? false;
 
 		public override void ActiveStart( Entity ent )
 		{
@@ -64,7 +97,7 @@ namespace RPG
 
 		public override TransmitType GetDesiredTransmitType()
 		{
-			if ( ItemEquippable.IsEquipped && Owner is RPGPlayer player && player.IsValid() )
+			if ( ItemEquippable.IsEquipped && Owner.IsValid() )
 				return TransmitType.Default;
 
 			return base.GetDesiredTransmitType();

@@ -70,7 +70,7 @@ namespace RPG
 					}
 
 					break;
-				case "ContainerEntityItems":
+				/*case "ContainerEntityItems":
 					var entconverter = options.GetConverter( typeof( Entity ) ) as JsonConverterEntity;
 
 					while ( reader.Read() )
@@ -89,7 +89,7 @@ namespace RPG
 						}
 					}
 
-					break;
+					break;*/
 				default:
 					return false;
 			}
@@ -123,7 +123,7 @@ namespace RPG
 			if ( container != null && container.Count > 0 )
 			{
 				var items = container.ItemList;
-				var ents = container.ItemEntities;
+				//var ents = container.ItemEntities;
 
 				var itemConverter = options.GetConverter( typeof( Item ) ) as JsonConverterItem;
 
@@ -136,7 +136,7 @@ namespace RPG
 				}
 				writer.WriteEndArray();
 
-				if ( ents.Count > 0 )
+				/*if ( ents.Count > 0 )
 				{
 					var entityConverter = options.GetConverter( typeof( Entity ) ) as JsonConverterEntity;
 
@@ -145,7 +145,7 @@ namespace RPG
 					foreach ( var ent in ents )
 						entityConverter.Write( writer, ent, options );
 					writer.WriteEndArray();
-				}
+				}*/
 			}
 		}
 

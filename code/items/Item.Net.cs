@@ -141,7 +141,25 @@ namespace RPG
 			var item = FindIn( ent, itemNetId );
 			if ( item == null ) return;
 
-			Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{itemNetId} was used." );
+			Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{itemNetId} was used by {player.Client.Name}." );
+		}
+
+		[ServerCmd]
+		public static void ServerCmdEquipItem( int itemNetId, bool shouldEquip )
+		{
+			if ( ConsoleSystem.Caller?.Pawn is not RPGPlayer player || !player.IsValid() ) return;
+
+			if ( !player.IsAlive() ) return;
+
+			var container = player.GetContainer();
+			if ( container == null ) return;
+
+			var item = FindIn( player, itemNetId );
+			if ( item == null || item is not ItemEquippable equip ) return;
+
+			container.EquipItem( equip, shouldEquip );
+
+			Log.Info( $"// Item {equip.ClassInfo.Name}#{itemNetId} was {(shouldEquip ? "" : "un")}equipped by {player.Client.Name}." );
 		}
 
 		[ServerCmd]
@@ -175,11 +193,13 @@ namespace RPG
 			var item = FindIn( sourceEntity, itemNetId );
 			if ( item == null ) return;
 
+			if ( !sourceContainer.CanWithdraw( player, item ) || !targetContainer.CanDeposit( player, item ) ) return;
+
 			if ( targetContainer.AddItem( item, true ) )
 			{
 				targetContainer.ChangeItemIndex( item, tile );
 
-				Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{itemNetId} in {sourceEntity} move to {targetEntity} in to tile {tile}." );
+				Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{itemNetId} in {sourceEntity} move to {targetEntity} in to tile {tile} by {player.Client.Name}." );
 			}
 		}
 
@@ -196,7 +216,7 @@ namespace RPG
 			var item = container.GetItemOfType( itemType );
 			if ( item == null ) return;
 
-			Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{item.NetworkIdentity} was used." );
+			Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{item.NetworkIdentity} was by-type used by {player.Client.Name}." );
 		}
 	}
 }

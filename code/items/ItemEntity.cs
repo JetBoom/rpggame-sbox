@@ -14,7 +14,6 @@ namespace RPG
 	public abstract partial class ItemEntity : ModelEntity, IHasDisplayInfo, ISavedEntity
 	{
 		public string ItemClassName => ClassInfo.Name[4..];
-		public bool EntityShouldExistInContainer => Item?.EntityShouldExistInContainer ?? false;
 
 		private ItemData _Data;
 		public ItemData Data => _Data == null ? _Data = ItemData.ResourceFor( ClassInfo.Name ) : _Data;

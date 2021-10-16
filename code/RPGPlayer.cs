@@ -46,6 +46,7 @@ namespace RPG
 			if ( IsServer )
 			{
 				Components.GetOrCreate<AbilityCasterComponent>();
+				//Components.GetOrCreate<EquipmentComponent>();
 				Components.GetOrCreate<ContainerComponent>();
 				Components.GetOrCreate<HealthComponent>();
 				Components.GetOrCreate<ManaComponent>();
@@ -418,7 +419,12 @@ namespace RPG
 			EnableAllCollisions = false;
 			EnableDrawing = false;
 
-			//this.GetInventoryComponent()?.MakeLootPack();
+			var container = this.GetContainer();
+			if ( container != null )
+			{
+				container.UnequipAllItems();
+				//container.MakeLootPack();
+			}
 		}
 
 		public virtual void OnStartMeleeAttack( ItemMeleeEntity weapon )

@@ -9,17 +9,17 @@ namespace RPG.UI
 {
 	public partial class ContainerPanel : Panel
 	{
-		private static readonly Dictionary<int, ContainerPanel> Panels = new();
+		private static readonly Dictionary<int, ContainerPanel> ContainerPanels = new();
 		//public static ContainerPanel LocalContainerPanel { get; protected set; }
 
 		public int NetId { get; protected set; }
 		public ContainerComponent Container { get; protected set; }
 
-		protected Label LabelName;
+		protected RPGLabel LabelName;
 
 		public static ContainerPanel GetPanelFor( int netid )
 		{
-			return Panels.TryGetValue( netid, out ContainerPanel panel ) ? panel : null;
+			return ContainerPanels.TryGetValue( netid, out ContainerPanel panel ) ? panel : null;
 		}
 
 		public static ContainerPanel GetOrCreatePanelFor( int netid )
@@ -27,26 +27,41 @@ namespace RPG.UI
 			var panel = GetPanelFor( netid );
 			if ( panel == null )
 			{
-				panel = RPGHudEntity.Current.RootPanel.AddChild<ContainerPanel>();
+				panel = RPGHudEntity.Current.InteractiveRoot.AddChild<ContainerPanel>();
 				panel.NetId = netid;
-				Panels.Add( netid, panel );
+
+				ContainerPanels.Add( netid, panel );
 			}
 
 			return panel;
+		}
+
+		public static void UpdateLocalContainerPanel()
+		{
+			var localContainer = Local.Pawn?.GetContainer();
+			if ( localContainer != null )
+			{
+				var panel = GetOrCreatePanelFor( localContainer.NetworkIdentity );
+				panel.UpdateAll( localContainer );
+			}
 		}
 
 		public ContainerPanel()
 		{
 			StyleSheet.Load( "/ui/ContainerPanel.scss" );
 
-			LabelName = Add.Label( "", "name" );
-
-			UpdateAll();
+			LabelName = Add.RPGLabel( "", "name" );
 		}
 
-		public void UpdateAll()
+		public override void Delete( bool immediate = false )
 		{
-			LabelName.SetText( $"Container for NetID {NetId}" );
+			ContainerPanels.Remove( NetId );
+			base.Delete( immediate );
+		}
+
+		public void UpdateAll( ContainerComponent container )
+		{
+			LabelName.SetText( $"Container for NetID {container.NetworkIdentity}" );
 		}
 
 		/*public override void Tick()

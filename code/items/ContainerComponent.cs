@@ -14,7 +14,7 @@ namespace RPG
 {
 	/// <summary>
 	/// A container component for an entity. Anything that can have items stored inside of it should have one of these.<br/>
-	/// To setup something with a container it should override and call Container?.OnChildAdded( entity ) and Container?.OnChildRemoved( entity )<br/>
+	/// If the container holder can equip anything it must call Container?.OnChildAdded( entity ) and Container?.OnChildRemoved( entity )<br/>
 	/// </summary>
 	[Library]
 	public partial class ContainerComponent : EntityComponent
@@ -59,17 +59,17 @@ namespace RPG
 
 		public int Count => Items.Count;
 
-		public List<ItemEntity> ItemEntities { get; init; } = new();
+		public List<ItemEquippableEntity> EquippedEntities { get; init; } = new();
 
 		public RPGPlayer Player => Entity is RPGPlayer player ? player : null;
 
-		/// <summary>The container owner's active ItemEntity, if there is one.</summary>
-		public ItemEntity ActiveItemEntity => Entity?.ActiveChild as ItemEntity;
-		/// <summary>The container owner's active ItemEntity's Item if there is one.</summary>
-		public Item ActiveItem => ActiveItemEntity?.Item;
+		/// <summary>The container owner's active ItemEquippableEntity, if there is one.</summary>
+		public ItemEquippableEntity ActiveItemEntity => Entity?.ActiveChild as ItemEquippableEntity;
+		/// <summary>The container owner's active ItemEquippable if there is one.</summary>
+		public ItemEquippable ActiveItem => ActiveItemEntity?.Item as ItemEquippable;
 
 		/// <summary>Utility to see how much money this container has.</summary>
-		public int Money => GetAmount<ItemMoney>();
+		public int Money => GetAmount( "item_money" );
 
 		public ContainerComponent() : base()
 		{
@@ -83,9 +83,14 @@ namespace RPG
 
 			Log.Info( "Items changed" );
 
+			UpdatePanel();
+		}
+
+		public void UpdatePanel()
+		{
 			var panel = ContainerPanel.GetPanelFor( NetworkIdentity );
 			if ( panel != null )
-				panel.UpdateAll();
+				panel.UpdateAll( this );
 		}
 
 		public Item GetItemOfType( string classname )
@@ -102,14 +107,19 @@ namespace RPG
 
 		public bool RemoveItem( Item item )
 		{
+			Host.AssertServer();
+
 			var index = Items.IndexOf( item );
 			if ( index == -1 ) return false;
+
+			if ( item is ItemEquippable equip )
+				UnequipItem( equip );
 
 			if ( item.Container == this )
 				item.Container = null;
 
-			if ( item.ItemEntity != null )
-				ItemEntities.Remove( item.ItemEntity );
+			/*if ( item.ItemEntity != null )
+				ItemEntities.Remove( item.ItemEntity );*/
 
 			Items.Remove( item );
 
@@ -120,6 +130,8 @@ namespace RPG
 
 		public void ChangeItemIndex( Item item, int index )
 		{
+			Host.AssertServer();
+
 			if ( item.Container != this ) return;
 
 			var currentIndex = Items.IndexOf( item );
@@ -144,21 +156,21 @@ namespace RPG
 		/// <summary>A child has been added to the Owner (player). Add it to the container if it's an ItemEntity.</summary>
 		public void OnChildAdded( Entity child )
 		{
-			if ( child is not ItemEntity itemEntity || !itemEntity.EntityShouldExistInContainer ) return;
+			if ( child is not ItemEquippableEntity equipEntity || !equipEntity.EntityShouldExistInContainer ) return;
 
-			if ( ItemEntities.Contains( itemEntity ) )
+			if ( EquippedEntities.Contains( equipEntity ) )
 				throw new Exception( "Trying to add to inventory multiple times. This is gated by Entity:OnChildAdded and should never happen!" );
 
-			/*if ( !itemEntity.EntityShouldExistInContainer )
+			/*if ( !equipEntity.EntityShouldExistInContainer )
 				throw new Exception( "Trying to add to inventory container an ItemEntity with EntityShouldExistInContainer = false. This should never happen!" );*/
 
-			if ( Host.IsServer && !Items.Contains( itemEntity.Item ) )
-				throw new Exception( $"An ItemEntity was added to {this} but the Item wasn't in the item list. You cannot call SetParent directly on ItemEntity!" );
+			if ( Host.IsServer && !Items.Contains( equipEntity.Item ) )
+				throw new Exception( $"An ItemEquippableEntity was added to {this} but the Item wasn't in the item list. You cannot call SetParent directly on ItemEntity!" );
 
-			ItemEntities.Add( itemEntity );
+			EquippedEntities.Add( equipEntity );
 
-			if ( itemEntity.IsValid() )
-				itemEntity.RefreshState();
+			if ( equipEntity.IsValid() )
+				equipEntity.RefreshState();
 
 			Player?.InvalidateStatus();
 
@@ -168,12 +180,12 @@ namespace RPG
 		/// <summary>A child has been removed from our Owner.</summary>
 		public void OnChildRemoved( Entity child )
 		{
-			if ( child is not ItemEntity itemEntity ) return;
+			if ( child is not ItemEquippableEntity equipEntity ) return;
 
-			if ( ItemEntities.Remove( itemEntity ) )
+			if ( EquippedEntities.Remove( equipEntity ) )
 			{
-				if ( itemEntity.IsValid() )
-					itemEntity.RefreshState();
+				if ( equipEntity.IsValid() )
+					equipEntity.RefreshState();
 
 				Player?.InvalidateStatus();
 			}
@@ -206,20 +218,34 @@ namespace RPG
 			Player?.InvalidateStatus();
 		}
 
-		/// <summary>Can this player move the items around, in to, or out of this container?</summary>
+		/// <summary>Can this player move the items around, in to, or out of this container?<br/>
+		/// This is a prerequisite for CanDeposit and CanWithdraw</summary>
 		public virtual bool CanManageItems( RPGPlayer player )
 		{
 			return player.GetContainer() == this;
 		}
 
-		/// <summary>A player is trying to drop this item.</summary>
+		/// <summary>Do we have permission to try and deposit this item?</summary>
+		/// <remarks>Assumes <see cref="CanManageItems(RPGPlayer)"/> has already been passed.</remarks>
+		public virtual bool CanDeposit( RPGPlayer player, Item item )
+		{
+			return true;
+		}
+
+		/// <summary>Do we have permission to try and withdraw this item?</summary>
+		/// <remarks>Assumes <see cref="CanManageItems(RPGPlayer)"/> has already been passed.</remarks>
+		public virtual bool CanWithdraw( RPGPlayer player, Item item )
+		{
+			return true;
+		}
+
 		public ItemEntity PlayerTryDrop( RPGPlayer player, Item item, int amount = -1 )
 		{
-			if ( !Host.IsServer ) return null;
+			Host.AssertServer();
 
 			if ( !Contains( item ) || item.Amount < 1 ) return null;
 
-			if ( !CanManageItems( player ) ) return null;
+			if ( !CanManageItems( player ) || !CanWithdraw( player, item ) ) return null;
 
 			// Drop all by default.
 			if ( amount == -1 || amount > item.Amount || item.Data.MaxAmount == 1 )
@@ -258,6 +284,58 @@ namespace RPG
 			return ent;
 		}
 
+		public bool EquipItem( ItemEquippable item, bool shouldEquip = true )
+		{
+			Host.AssertServer();
+
+			if ( !Contains( item ) ) return false;
+
+			if ( item.IsEquipped == shouldEquip ) return true;
+
+			if ( shouldEquip )
+				UnequipItem( item.Slot, item );
+
+			item.IsEquipped = shouldEquip;
+			if ( shouldEquip )
+				item.OnEquipped();
+			else
+				item.OnUnequipped();
+
+			if ( Entity is IUseStatusMods modder )
+				modder.InvalidateStatus();
+
+			return true;
+		}
+
+		public void UnequipItem( EquipSlot slot, Item ignore = null )
+		{
+			Host.AssertServer();
+
+			foreach ( var equip in GetEquippedItems() )
+			{
+				if ( equip == ignore ) continue;
+
+				if ( equip.Slot == slot && equip.IsEquipped )
+				{
+					equip.IsEquipped = false;
+					break;
+				}
+			}
+		}
+
+		public bool UnequipItem( ItemEquippable item )
+		{
+			return EquipItem( item, false );
+		}
+
+		public void UnequipAllItems()
+		{
+			Host.AssertServer();
+
+			foreach ( var equip in GetEquippedItems() )
+				UnequipItem( equip );
+		}
+
 		public Transform GetDropTransform()
 		{
 			Transform transform = new();
@@ -277,7 +355,7 @@ namespace RPG
 		}
 
 		public bool Contains( Item item ) => Items.Contains( item );
-		public bool Contains( ItemEntity itemEntity ) => ItemEntities.Contains( itemEntity );
+		public bool Contains( ItemEquippableEntity equipEntity ) => EquippedEntities.Contains( equipEntity );
 
 		public bool Contains( string itemClassName, int checkAmount = 1 )
 		{
@@ -382,6 +460,28 @@ namespace RPG
 			return amount;
 		}
 
+		/// <summary>
+		/// Add an item to us, without stacking at all. If ignoreCapacityLimits is true add the item even if it would put us over <see cref="MaxItems"/>
+		/// </summary>
+		public bool AddWholeItem( Item item, bool ignoreCapacityLimits = false )
+		{
+			Host.AssertServer();
+
+			if ( item.Container == this )
+				return true;
+
+			if ( ignoreCapacityLimits || Items.Count < MaxItems )
+			{
+				item.Container?.RemoveItem( item );
+				Items.Add( item );
+				item.Container = this;
+
+				return true;
+			}
+
+			return false;
+		}
+
 		/// <summary>Add this item to the inventory.</summary>
 		public bool AddItem( Item item, bool onlyAddEntireStack = false/*, bool ignoreCapacityLimits = false*/ )
 		{
@@ -451,6 +551,8 @@ namespace RPG
 
 		public bool AddItem( string classname, int amount, bool onlyAddEntireStack = false/*, bool ignoreCapacityLimits = false*/ )
 		{
+			Host.AssertServer();
+
 			var item = Library.Create<Item>( classname );
 			if ( item != null )
 			{
@@ -468,6 +570,8 @@ namespace RPG
 		/// <summary>Creates a loot bag and puts all our droppable items in it, if we have any.</summary>
 		public Entity CreateLootBag()
 		{
+			Host.AssertServer();
+
 			List<Item> toDrop = new();
 
 			foreach ( var item in ItemList )
@@ -477,6 +581,17 @@ namespace RPG
 
 				toDrop.Add( item );
 			}
+
+			/*var equipment = Entity.GetEquipmentComponent();
+			if ( equipment != null )
+			{
+				foreach ( var equip in equipment.EquipmentList )
+				{
+					//if ( equip.Data.IsBlessed )
+						//continue;
+					toDrop.Add( equip );
+				}
+			}*/
 
 			if ( toDrop.Count == 0 ) return null;
 
@@ -488,11 +603,11 @@ namespace RPG
 
 			if ( !ent.IsValid() ) return null;
 
-			var c = ent.Components.GetOrCreate<ContainerComponent>();
+			var c = ent.Components.GetOrCreate<LootContainerComponent>();
 			if ( c != null )
 			{
 				foreach ( var item in toDrop )
-					c.AddItem( item );
+					c.AddWholeItem( item );
 			}
 
 			ent.Transform = GetDropTransform();

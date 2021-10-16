@@ -14,8 +14,8 @@ namespace RPG.UI
 			Mana,
 			Stamina,
 		}
-		public Label LabelCurrent { get; init; }
-		public Label LabelMax { get; init; }
+		public RPGLabel LabelCurrent { get; init; }
+		public RPGLabel LabelMax { get; init; }
 		public Panel Bar { get; init; }
 
 		private float LastValue = 0.0f;
@@ -54,8 +54,8 @@ namespace RPG.UI
 			StyleSheet.Load( "/ui/StatBar.scss" );
 
 			Bar = Add.Panel( "bar" );
-			LabelCurrent = Add.Label( LastValue.ToString(), "current" );
-			LabelMax = Add.Label( LastMax.ToString(), "max" );
+			LabelCurrent = Add.RPGLabel( LastValue.ToString(), "current" );
+			LabelMax = Add.RPGLabel( LastMax.ToString(), "max" );
 
 			UpdateSizes();
 			UpdateLabels();

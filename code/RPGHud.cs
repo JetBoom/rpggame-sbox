@@ -7,7 +7,8 @@ namespace RPG
 {
 	public partial class RPGHudEntity : HudEntity<RootPanel>
 	{
-		public static RPGHudEntity Current { get; private set; }
+		public static RPGHudEntity Current { get; protected set; }
+		public InteractiveRootPanel InteractiveRoot { get; protected set; }
 
 		public RPGHudEntity()
 		{
@@ -31,7 +32,9 @@ namespace RPG
 			RootPanel.AddChild<StatBars>();
 			RootPanel.AddChild<HotBar>();
 
-			RootPanel.AddChild<Scoreboard<ScoreboardEntry>>();
+			//RootPanel.AddChild<Scoreboard<ScoreboardEntry>>();
+
+			InteractiveRoot = RootPanel.AddChild<InteractiveRootPanel>();
 		}
 	}
 }
