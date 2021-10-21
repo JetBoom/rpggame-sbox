@@ -11,7 +11,7 @@ using System.IO;
 namespace RPG
 {
 	[Library( Group = "base" )]
-	public abstract partial class Item : BaseNetworkable, IJsonSerializable
+	public abstract partial class Item : BaseNetworkable, IJsonSerializable, IHasDisplayInfo
 	{
 		//public static readonly Dictionary<int, Item> AllItems = new();
 
@@ -59,6 +59,11 @@ namespace RPG
 				NetworkIdentity = RPGGame.NewNetworkIdentity();
 		}
 
+		public virtual string GetDisplayInfo()
+		{
+			return Data.Name;
+		}
+
 		public Client Client
 		{
 			get
@@ -98,6 +103,10 @@ namespace RPG
 			Container?.RemoveItem( this );
 		}
 
+		public virtual void OnUsed( RPGPlayer player )
+		{
+		}
+
 		public virtual void Serialize( Utf8JsonWriter writer, JsonSerializerOptions options )
 		{
 			if ( Amount != 1 )
@@ -108,7 +117,7 @@ namespace RPG
 		{
 			switch ( propertyName )
 			{
-				case "Amount":
+				case nameof( Amount ):
 					reader.Read();
 					Amount = reader.GetInt32();
 					return true;

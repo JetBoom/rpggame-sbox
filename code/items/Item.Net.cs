@@ -138,10 +138,15 @@ namespace RPG
 
 			if ( !player.IsAlive() ) return;
 
+			var container = ent.GetContainer();
+			if ( container == null ) return;
+
 			var item = FindIn( ent, itemNetId );
 			if ( item == null ) return;
 
 			Log.Info( $"// TODO: Item {item.ClassInfo.Name}#{itemNetId} was used by {player.Client.Name}." );
+
+			container.PlayerTryUse( player, item );
 		}
 
 		[ServerCmd]

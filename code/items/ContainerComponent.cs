@@ -1,4 +1,4 @@
-﻿using Sandbox;
+using Sandbox;
 using Sandbox.Internal;
 using System;
 using System.Collections.Generic;
@@ -156,7 +156,7 @@ namespace RPG
 		/// <summary>A child has been added to the Owner (player). Add it to the container if it's an ItemEntity.</summary>
 		public void OnChildAdded( Entity child )
 		{
-			if ( child is not ItemEquippableEntity equipEntity || !equipEntity.EntityShouldExistInContainer ) return;
+			if ( child is not ItemEquippableEntity equipEntity ) return;
 
 			if ( EquippedEntities.Contains( equipEntity ) )
 				throw new Exception( "Trying to add to inventory multiple times. This is gated by Entity:OnChildAdded and should never happen!" );
@@ -282,6 +282,17 @@ namespace RPG
 			ent.RefreshState();
 
 			return ent;
+		}
+
+		public void PlayerTryUse( RPGPlayer player, Item item )
+		{
+			Host.AssertServer();
+
+			if ( !Contains( item ) || item.Amount < 1 ) return;
+			if ( !item.Data.CanUseFromInventory ) return;
+			if ( !CanManageItems( player ) ) return;
+
+			item.OnUsed( player );
 		}
 
 		public bool EquipItem( ItemEquippable item, bool shouldEquip = true )
