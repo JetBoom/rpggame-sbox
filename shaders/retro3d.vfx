@@ -1,0 +1,78 @@
+// Optional
+HEADER
+{
+	CompileTargets = ( IS_SM_50 && ( PC || VULKAN ) );
+	//DevShader = true;
+	Description = "Simple retro 3d material";
+}
+
+// Optional
+FEATURES
+{
+    #include "common/features.hlsl"
+}
+
+// Optional
+MODES
+{
+	// Indicates this shader will be used for main rendering
+	VrForward();
+	// Shader that will be used for shadowing and depth prepass
+	Depth( "vr_depth_only.vfx" );
+	// Ability to see in the editor
+	ToolsVis( S_MODE_TOOLS_VIS );
+	// Allows for mat_wireframe to work
+	ToolsWireframe( "vr_tools_wireframe.vfx" );
+	// Shows how expensive drawing is in debug view
+	ToolsShadingComplexity( "vr_tools_shading_complexity.vfx" );
+}
+
+COMMON
+{
+	#include "common/shared.hlsl"
+}
+
+struct VertexInput
+{
+	#include "common/vertexinput.hlsl"
+};
+
+struct PixelInput
+{
+	#include "common/pixelinput.hlsl"
+};
+
+VS
+{
+	#include "common/vertex.hlsl"
+
+	// Main
+	PixelInput MainVs( INSTANCED_SHADER_PARAMS( VertexInput i ) )
+	{
+		PixelInput o = ProcessVertex( i );
+
+		/*float3 vPositionWs = o.vPositionWs;
+		vPositionWs.x = floor(vPositionWs.x / 2.0f) * 2.0f;
+		vPositionWs.y = floor(vPositionWs.y / 2.0f) * 2.0f;
+		vPositionWs.z = floor(vPositionWs.z / 2.0f) * 2.0f;
+		o.vPositionPs = Position3WsToPs( vPositionWs );
+		o.vPositionWs = vPositionWs;*/
+
+		return FinalizeVertex( o );
+	}
+}
+
+PS
+{
+	#define CUSTOM_TEXTURE_FILTERING
+	SamplerState TextureFiltering < Filter( POINT ); MaxAniso( 4 ); >;
+
+	#include "common/pixel.hlsl"
+
+	// Main
+	PixelOutput MainPs( PixelInput i )
+	{
+		Material m = GatherMaterial( i );
+		return FinalizePixelMaterial( i, m );
+	}
+}
