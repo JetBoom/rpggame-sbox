@@ -47,7 +47,7 @@ namespace RPG
 			PhysicsBody.GravityEnabled = false;
 			PhysicsBody.DragEnabled = false;
 			PhysicsBody.AngularDamping = 0f;
-			PhysicsBody.AngularDrag = 0f;
+			PhysicsBody.AngularDrag = PhysicsBody.LinearDrag = 0f;
 			PhysicsBody.EnableAutoSleeping = false;
 			UsePhysicsCollision = false;
 			EnableAllCollisions = false;
