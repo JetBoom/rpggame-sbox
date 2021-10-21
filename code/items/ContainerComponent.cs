@@ -1,4 +1,4 @@
-using Sandbox;
+﻿using Sandbox;
 using Sandbox.Internal;
 using System;
 using System.Collections.Generic;
@@ -88,9 +88,9 @@ namespace RPG
 
 		public void UpdatePanel()
 		{
-			var panel = ContainerPanel.GetPanelFor( NetworkIdentity );
+			var panel = ContainerPanel.GetPanelFor( this );
 			if ( panel != null )
-				panel.UpdateAll( this );
+				panel.UpdateAll();
 		}
 
 		public Item GetItemOfType( string classname )
