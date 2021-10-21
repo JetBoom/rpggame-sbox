@@ -4,7 +4,7 @@
 namespace RPG
 {
 	[Library( "projectile_thorn" )]
-	public partial class ProjectileThorn : ProjectileDamage
+	public partial class ProjectileThorn : ProjectileDamaging
 	{
 		public override float DamageRadius => 0f;
 		public override float Speed => 2000f;
@@ -17,7 +17,7 @@ namespace RPG
 		protected override string SoundHit => "projectile.thorn.hit";
 		protected override string SoundExpire => "projectile.generic.expire";
 
-		private readonly Model ThornModel = Model.Load( "models/rust_props/small_junk/can.vmdl" );
+		private static readonly Model ThornModel = Model.Load( "models/wooden_box_1.vmdl" ); //Model.Load( "models/rust_props/small_junk/can.vmdl" );
 
 		public ProjectileThorn() : base()
 		{

@@ -44,6 +44,8 @@ namespace RPG
 
 				Add( classInfo.Name );
 			}
+
+			Abilities.Sort( ( a1, a2 ) => string.Compare( a1.Name, a2.Name ) );
 		}
 	}
 }

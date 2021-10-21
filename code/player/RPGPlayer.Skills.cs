@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 
+// TODO: Make this an EntityComponent
 namespace RPG
 {
 	public partial class RPGPlayer

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RPG
 {
-	public abstract partial class ProjectileDamage : Projectile
+	public abstract partial class ProjectileDamaging : Projectile
 	{
 		public virtual float BaseDamage => 10f;
 		public virtual float DamageRadius => 0f;
@@ -16,7 +16,7 @@ namespace RPG
 		public virtual DamageFlags DamageFlags => DamageFlags.Blunt;
 		public virtual bool RadiusOnlyAffectPlayers => false;
 
-		public ProjectileDamage() : base()
+		public ProjectileDamaging() : base()
 		{
 		}
 

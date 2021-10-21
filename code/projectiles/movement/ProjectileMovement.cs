@@ -10,7 +10,7 @@ namespace RPG
 {
 	public partial class ProjectileMovement
 	{
-		protected Projectile Projectile;
+		public Projectile Projectile { get; init; }
 
 		public ProjectileMovement( Projectile proj )
 		{
