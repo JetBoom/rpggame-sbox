@@ -5,8 +5,9 @@ namespace RPG
 {
 	public interface IHasDisplayInfo
 	{
-		// TODO: Allow richer info display by passing some HUD panel here instead.
-		public abstract string GetDisplayInfo();
+		public abstract string GetDisplayName();
+
+		public void WriteDisplayInfo( DisplayInfoPanel panel ) { }
 
 		public float DisplayInfoDistance => 1000f;
 
