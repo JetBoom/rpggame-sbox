@@ -10,10 +10,17 @@ namespace RPG
 {
 	public abstract partial class Projectile : ModelEntity
 	{
+		/// <summary>Travel speed in m/s</summary>
 		public virtual float Speed => 800f;
-		public virtual float Radius => 0f;
+		/// <summary>How big we are for hit detection purposes.</summary>
+		public virtual float Size => 0f;
+		/// <summary>Test traces/collisions on hitboxes, otherwise bounding boxes.</summary>
 		public virtual bool UseHitboxes => false;
+		/// <summary>If true then call the Hit function if our lifetime runs out. For example, if this is an explosive then explode if we run out of time.</summary>
+		/// <remarks>OnExpire will not be called if we hit due to this.</remarks>
 		public virtual bool HitOnExpire => false;
+		/// <summary>Time before expiring if we don't hit anything.</summary>
+		public virtual float LifeTime => 5f;
 
 		protected virtual ProjectileMovement CreateMovement() => new ProjectileMovement( this );
 
@@ -25,7 +32,6 @@ namespace RPG
 		protected Vector3 LastPosition;
 		protected bool Hit;
 		protected TimeSince TimeSinceCreation;
-		protected virtual float LifeTime => 5f;
 
 		public float LifeTimeLeft => LifeTime - TimeSinceCreation;
 
@@ -42,7 +48,7 @@ namespace RPG
 		{
 			base.Spawn();
 
-			SetupPhysicsFromSphere( PhysicsMotionType.Dynamic, Vector3.Zero, Math.Max( Radius, 1.0f ) );
+			SetupPhysicsFromSphere( PhysicsMotionType.Dynamic, Vector3.Zero, Math.Max( Size, 1.0f ) );
 			PhysicsEnabled = true;
 			PhysicsBody.GravityEnabled = false;
 			PhysicsBody.DragEnabled = false;
@@ -64,7 +70,7 @@ namespace RPG
 
 			var tr = Trace
 				.Ray( LastPosition, Position )
-				.Radius( Radius )
+				.Radius( Size )
 				.UseHitboxes( UseHitboxes )
 				.WorldAndEntities()
 				.HitLayer( CollisionLayer.Solid )
