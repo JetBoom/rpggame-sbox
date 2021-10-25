@@ -13,7 +13,7 @@ namespace RPG
 		{
 			var data = AbilityManager.Get( AbilityClass );
 			if ( data == null )
-				return base.GetDisplayInfo();
+				return $"Book of {AbilityClass}";
 
 			return $"Book of {data.DisplayName}";
 		}
