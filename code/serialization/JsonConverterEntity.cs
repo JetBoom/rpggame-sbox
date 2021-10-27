@@ -1,4 +1,4 @@
-﻿using Sandbox;
+using Sandbox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -129,7 +129,7 @@ namespace RPG
 					writer.WriteVector3( "Velocity", ent.Velocity );
 			}
 
-			if ( ent is RPGPlayer )
+			if ( ent.LifeState != LifeState.Alive )
 				writer.WriteString( "LifeState", ent.LifeState.ToString() );
 
 			if ( ent.GetHealth() > 0f )
