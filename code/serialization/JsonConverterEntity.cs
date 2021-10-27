@@ -1,4 +1,4 @@
-using Sandbox;
+﻿using Sandbox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -84,6 +84,25 @@ namespace RPG
 							reader.Read();
 							ent.SetStamina( (float)reader.GetDecimal() );
 							break;
+						case "ContainerItems":
+							var container = ent.GetContainer();
+							if ( container == null ) break;
+
+							var converter = options.GetConverter( typeof( Item ) ) as JsonConverterItem;
+
+							while ( reader.Read() )
+							{
+								if ( reader.TokenType == JsonTokenType.StartArray ) continue;
+								if ( reader.TokenType == JsonTokenType.EndArray ) break;
+								if ( reader.TokenType == JsonTokenType.StartObject )
+								{
+									var item = converter.Read( ref reader, typeof( Item ), options );
+									if ( item != null )
+										container.AddItem( item );
+								}
+							}
+
+							break;
 						default:
 							// Non-standard property? Let the entity itself try to handle it.
 							if ( ent is IJsonSerializable ser )
@@ -142,6 +161,24 @@ namespace RPG
 			var stamina = ent.GetStamina();
 			if ( stamina > 0f )
 				writer.WriteNumber( "Stamina", stamina );
+
+			var container = ent.GetContainer();
+			if ( container != null && container.Count > 0 )
+			{
+				var items = container.ItemList;
+				//var ents = container.ItemEntities;
+
+				var itemConverter = options.GetConverter( typeof( Item ) ) as JsonConverterItem;
+
+				writer.WritePropertyName( "ContainerItems" );
+				writer.WriteStartArray();
+				foreach ( var item in items )
+				{
+					if ( !item.ItemEntity.IsValid() )
+						itemConverter.Write( writer, item, options );
+				}
+				writer.WriteEndArray();
+			}
 
 			// Let the entity serialize stuff now. Polymorphic serialization!
 			if ( ent is IJsonSerializable ser )

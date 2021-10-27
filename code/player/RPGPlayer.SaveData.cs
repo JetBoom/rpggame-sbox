@@ -51,45 +51,6 @@ namespace RPG
 					}
 
 					break;
-				case "ContainerItems":
-					var container = this.GetContainer();
-					if ( container == null ) break;
-
-					var converter = options.GetConverter( typeof( Item ) ) as JsonConverterItem;
-
-					while ( reader.Read() )
-					{
-						if ( reader.TokenType == JsonTokenType.StartArray ) continue;
-						if ( reader.TokenType == JsonTokenType.EndArray ) break;
-						if ( reader.TokenType == JsonTokenType.StartObject )
-						{
-							var item = converter.Read( ref reader, typeof( Item ), options );
-							if ( item != null )
-								container.AddItem( item );
-						}
-					}
-
-					break;
-				/*case "ContainerEntityItems":
-					var entconverter = options.GetConverter( typeof( Entity ) ) as JsonConverterEntity;
-
-					while ( reader.Read() )
-					{
-						if ( reader.TokenType == JsonTokenType.StartArray ) continue;
-						if ( reader.TokenType == JsonTokenType.EndArray ) break;
-						if ( reader.TokenType == JsonTokenType.StartObject )
-						{
-							var itemEntity = entconverter.Read( ref reader, typeof( Entity ), options );
-							if ( itemEntity.IsValid() )
-							{
-								itemEntity.Position = WorldSpaceBounds.Center;
-								itemEntity.Owner = this;
-								itemEntity.SetParent( this, null, Transform.Zero );
-							}
-						}
-					}
-
-					break;*/
 				default:
 					return false;
 			}
@@ -117,35 +78,6 @@ namespace RPG
 				for ( int i = 0; i < UnlockedAbilities.Count; ++i )
 					writer.WriteStringValue( UnlockedAbilities[i] );
 				writer.WriteEndArray();
-			}
-
-			var container = this.GetContainer();
-			if ( container != null && container.Count > 0 )
-			{
-				var items = container.ItemList;
-				//var ents = container.ItemEntities;
-
-				var itemConverter = options.GetConverter( typeof( Item ) ) as JsonConverterItem;
-
-				writer.WritePropertyName( "ContainerItems" );
-				writer.WriteStartArray();
-				foreach ( var item in items )
-				{
-					if ( !item.ItemEntity.IsValid() )
-						itemConverter.Write( writer, item, options );
-				}
-				writer.WriteEndArray();
-
-				/*if ( ents.Count > 0 )
-				{
-					var entityConverter = options.GetConverter( typeof( Entity ) ) as JsonConverterEntity;
-
-					writer.WritePropertyName( "ContainerEntityItems" );
-					writer.WriteStartArray();
-					foreach ( var ent in ents )
-						entityConverter.Write( writer, ent, options );
-					writer.WriteEndArray();
-				}*/
 			}
 		}
 
