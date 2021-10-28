@@ -1,6 +1,6 @@
 ﻿using Sandbox;
 using Sandbox.UI;
-using System.IO;
+using RPG.UI;
 
 
 namespace RPG
@@ -10,6 +10,8 @@ namespace RPG
 		private static int NetworkIdentityIncrement = 0;
 
 		public static int NewNetworkIdentity() => ++NetworkIdentityIncrement;
+
+		public RPGHud HUD { get; init; }
 
 		private bool ManagersLoaded;
 
@@ -24,9 +26,10 @@ namespace RPG
 				InitManagers();
 
 				UserPermissions.Load();
-
-				_ = new RPGHudEntity();
 			}
+
+			if ( IsClient )
+				HUD = new RPGHud();
 		}
 
 		private void InitManagers()

@@ -27,7 +27,7 @@ namespace RPG.UI
 			var panel = GetPanelFor( container );
 			if ( panel == null )
 			{
-				panel = RPGHudEntity.Current.InteractiveRoot.AddChild<ContainerPanel>();
+				panel = RPGHud.Current.InteractiveRoot.AddChild<ContainerPanel>();
 				panel.Container = container;
 
 				ContainerPanels.Add( container, panel );
